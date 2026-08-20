@@ -1,0 +1,25 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# Large trace artifacts (reproducible via fpce-download)
+data/raw/
+data/interim/
+data/processed/**/*.parquet
+data/processed/**/time_grid_chunks/
+
+# Keep small contract JSONs tracked
+!data/processed/rack_machine_ids.json
+!data/processed/replication_rack_machine_ids.json
+!data/processed/*_time_split.json
+
+# Quality JSON is a Role A deliverable; keep it tracked
+!reports/data_quality.json
+
+# Literature PDFs (local reading copies; not required to run the pipeline)
+state-of-the-art/*.pdf

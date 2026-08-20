@@ -1,0 +1,21 @@
+{
+  "grid_path": "/home/akkarie/Documentos/Datacenters/data/processed/primary/time_grid.parquet",
+  "time_min": 0,
+  "time_max": 691140,
+  "split_timestamp": 518355,
+  "train_fraction": 0.75,
+  "grid_train_rows": 300127,
+  "grid_test_rows": 114693,
+  "n_machines": 40,
+  "rule": {
+    "grid": "time_stamp < split_timestamp",
+    "instances": "start_time < split_timestamp"
+  },
+  "instance_events_path": "/home/akkarie/Documentos/Datacenters/data/processed/primary/instance_events.parquet",
+  "instance_train_rows": 9083115,
+  "instance_test_rows": 4005360,
+  "instance_train_positive_rate": 0.2,
+  "instance_test_positive_rate": 0.0951,
+  "instance_train_costing_rows": 4720,
+  "instance_test_costing_rows": 204
+}

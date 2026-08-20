@@ -1,0 +1,166 @@
+{
+  "racks": {
+    "primary": {
+      "rack": "primary",
+      "label": "primary training rack (failure domain 51)",
+      "machine_usage_rows": 2470351,
+      "batch_instance_rows": 13088475,
+      "batch_task_rows": 14295731,
+      "time_grid_rows": 414820,
+      "machines": 40,
+      "time_range_seconds": {
+        "min": 0,
+        "max": 691190
+      },
+      "null_pct": {
+        "machine_usage": {
+          "machine_id": 0.0,
+          "time_stamp": 0.0,
+          "cpu_util_percent": 0.0,
+          "mem_util_percent": 0.0,
+          "mem_gps": 78.83,
+          "mkpi": 78.83,
+          "net_in": 0.0,
+          "net_out": 0.0,
+          "disk_io_percent": 0.03
+        },
+        "batch_instance": {
+          "instance_name": 0.0,
+          "task_name": 0.0,
+          "job_name": 0.0,
+          "task_type": 0.0,
+          "status": 0.0,
+          "start_time": 0.0,
+          "end_time": 0.0,
+          "machine_id": 0.0,
+          "seq_no": 0.0,
+          "total_seq_no": 0.0,
+          "cpu_avg": 1.09,
+          "cpu_max": 1.09,
+          "mem_avg": 6.74,
+          "mem_max": 9.05
+        },
+        "time_grid": {
+          "machine_id": 0.0,
+          "time_stamp": 0.0,
+          "cpu_util_percent": 0.0,
+          "mem_util_percent": 0.0,
+          "mem_gps": 77.96,
+          "mkpi": 77.96,
+          "net_in": 0.0,
+          "net_out": 0.0,
+          "disk_io_percent": 0.03,
+          "active_instances": 0.0,
+          "seconds_to_next_failure": 6.27,
+          "failure_within_horizon": 0.0,
+          "data_gap": 0.0
+        }
+      },
+      "cpu_util_percent": {
+        "mean": 40.72,
+        "p50": 40.0,
+        "p95": 66.0
+      },
+      "failure_status_counts": {
+        "Terminated": 12952837,
+        "Running": 113814,
+        "Failed": 20693,
+        "Interrupted": 1087,
+        "Ready": 44
+      },
+      "failure_within_horizon_rate": 36.8389,
+      "data_gap_rate_pct": 0.0,
+      "note": "failure_within_horizon is an auxiliary machine-minute column, not the prediction target. See instance_events.",
+      "instance_events": {
+        "rows": 13088475,
+        "failed_rows": 21780,
+        "trainable_rows": 12974617,
+        "trainable_positive_rate_pct": 0.1679,
+        "costing_rows": 4924,
+        "censored_rows": 113858,
+        "median_waste_window_seconds": 10.0
+      }
+    },
+    "replication": {
+      "rack": "replication",
+      "label": "held-out replication rack (failure domain 52, same window and hardware)",
+      "machine_usage_rows": 2467918,
+      "batch_instance_rows": 13139756,
+      "batch_task_rows": 14295731,
+      "time_grid_rows": 414279,
+      "machines": 40,
+      "time_range_seconds": {
+        "min": 0,
+        "max": 691190
+      },
+      "null_pct": {
+        "machine_usage": {
+          "machine_id": 0.0,
+          "time_stamp": 0.0,
+          "cpu_util_percent": 0.0,
+          "mem_util_percent": 0.0,
+          "mem_gps": 78.8,
+          "mkpi": 78.8,
+          "net_in": 0.0,
+          "net_out": 0.0,
+          "disk_io_percent": 0.03
+        },
+        "batch_instance": {
+          "instance_name": 0.0,
+          "task_name": 0.0,
+          "job_name": 0.0,
+          "task_type": 0.0,
+          "status": 0.0,
+          "start_time": 0.0,
+          "end_time": 0.0,
+          "machine_id": 0.0,
+          "seq_no": 0.0,
+          "total_seq_no": 0.0,
+          "cpu_avg": 1.08,
+          "cpu_max": 1.08,
+          "mem_avg": 6.83,
+          "mem_max": 9.15
+        },
+        "time_grid": {
+          "machine_id": 0.0,
+          "time_stamp": 0.0,
+          "cpu_util_percent": 0.0,
+          "mem_util_percent": 0.0,
+          "mem_gps": 77.93,
+          "mkpi": 77.93,
+          "net_in": 0.0,
+          "net_out": 0.0,
+          "disk_io_percent": 0.03,
+          "active_instances": 0.0,
+          "seconds_to_next_failure": 6.38,
+          "failure_within_horizon": 0.0,
+          "data_gap": 0.0
+        }
+      },
+      "cpu_util_percent": {
+        "mean": 40.23,
+        "p50": 39.0,
+        "p95": 65.0
+      },
+      "failure_status_counts": {
+        "Terminated": 13005308,
+        "Running": 112319,
+        "Failed": 21124,
+        "Interrupted": 963,
+        "Ready": 42
+      },
+      "failure_within_horizon_rate": 37.5894,
+      "data_gap_rate_pct": 0.0,
+      "note": "failure_within_horizon is an auxiliary machine-minute column, not the prediction target. See instance_events.",
+      "instance_events": {
+        "rows": 13139756,
+        "failed_rows": 22087,
+        "trainable_rows": 13027395,
+        "trainable_positive_rate_pct": 0.1695,
+        "costing_rows": 5123,
+        "censored_rows": 112361,
+        "median_waste_window_seconds": 10.0
+      }
+    }
+  }
+}

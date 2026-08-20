@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fpce"
+version = "0.1.0"
+description = "Fault-triggered Physical Cost Estimator — datacenter trace ingestion and costing"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.0",
+    "pyarrow>=14.0",
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "tqdm>=4.66",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+fpce-download = "fpce.ingest.download:main"
+fpce-select-rack = "fpce.ingest.select_rack:main"
+fpce-filter-instances = "fpce.ingest.filter_instances:main"
+fpce-build-parquet = "fpce.ingest.build_parquet:main"
+fpce-time-grid = "fpce.ingest.time_grid:main"
+fpce-instance-events = "fpce.ingest.instance_events:main"
+fpce-quality-report = "fpce.ingest.quality_report:main"
+fpce-freeze-split = "fpce.ingest.freeze_split:main"
+fpce-replay = "fpce.replay.stream:main"
+fpce-specpower = "fpce.provenance.specpower:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

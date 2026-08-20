@@ -1,0 +1,50 @@
+schema_version = 2
+
+[power_model]
+form = "P = P_idle + (P_peak - P_idle) * utilization"
+reference = "Fan, Weber, Barroso (2007), ISCA '07"
+notes = "utilization is CPU fraction in [0, 1]. Sweep only physically consistent (P_idle <= P_peak) corners; the envelope spans server classes, not a single machine."
+
+[power_model.p_idle_watts]
+min = 80.0
+max = 220.0
+unit = "W"
+basis = "SPECpower_ssj2008 Active Idle envelope across comparable server classes (not per-machine mapping)"
+reference = "fpce.provenance.specpower summarize_power_envelope()"
+status = "verified"
+
+[power_model.p_peak_watts]
+min = 150.0
+max = 450.0
+unit = "W"
+basis = "SPECpower_ssj2008 100% load envelope across comparable server classes (not per-machine mapping)"
+reference = "fpce.provenance.specpower summarize_power_envelope()"
+status = "verified"
+
+[facility.pue]
+min = 1.15
+max = 1.40
+unit = "dimensionless"
+reference = "Shehabi et al. (2024), LBNL-2001637, Figure 4.6: U.S. average PUE ~1.4 in 2023; 2028 scenario range 1.15–1.35"
+basis = "Facility energy = IT kWh × PUE. Overhead energy = IT kWh × (PUE − 1). Not used in the water chain."
+status = "verified"
+
+[water.wue_l_per_kwh]
+min = 0.45
+max = 0.48
+unit = "L/kWh"
+reference = "Shehabi et al. (2024), LBNL-2001637, Figure 4.7: U.S. average site WUE 0.45–0.48 L/kWh after 2023"
+scope = "onsite WUE only; WUE_source (offsite grid water) out of scope"
+denominator = "IT equipment energy (Green Grid WP#35). Do NOT multiply by cooling share or PUE first."
+status = "verified"
+
+[water.wue_definition]
+metric = "WUE = annual site water usage (L) / IT equipment energy (kWh)"
+reference = "The Green Grid (2011), White Paper #35, Water Usage Effectiveness (WUE): A Green Grid Data Center Sustainability Metric"
+status = "verified"
+
+[translation]
+it_energy_kwh = "integral of Fan et al. power over the waste window, converted W·s → kWh"
+facility_energy_kwh = "it_energy_kwh * PUE"
+water_liters = "it_energy_kwh * WUE"
+notes = "Cooling share of IT power is intentionally omitted: WUE is already denominated in IT energy, so multiplying by a cooling share would double-count."

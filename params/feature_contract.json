@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "prediction_unit": "batch_instance",
+  "label": "failed",
+  "decision_time_column": "decision_time",
+  "split_column": "start_time",
+  "allow": [
+    "seq_no",
+    "total_seq_no",
+    "plan_cpu",
+    "plan_mem",
+    "instance_num",
+    "task_type",
+    "machine_id"
+  ],
+  "allow_from_time_grid_at_or_before_decision": [
+    "cpu_util_percent",
+    "mem_util_percent",
+    "mem_gps",
+    "mkpi",
+    "net_in",
+    "net_out",
+    "disk_io_percent",
+    "active_instances"
+  ],
+  "deny": [
+    "cpu_avg",
+    "cpu_max",
+    "mem_avg",
+    "mem_max",
+    "end_time",
+    "status",
+    "failed",
+    "outcome",
+    "event_end",
+    "waste_window_seconds",
+    "seconds_to_next_failure",
+    "failure_within_horizon",
+    "instance_name",
+    "job_name",
+    "task_name"
+  ],
+  "deny_reasons": {
+    "cpu_avg": "Only known after the instance finishes; post-hoc telemetry.",
+    "cpu_max": "Only known after the instance finishes; post-hoc telemetry.",
+    "mem_avg": "Only known after the instance finishes; post-hoc telemetry.",
+    "mem_max": "Only known after the instance finishes; post-hoc telemetry.",
+    "end_time": "Outcome time; using it is label leakage.",
+    "status": "The label is derived from this column.",
+    "failed": "This is the prediction target.",
+    "outcome": "This is a recoding of the target.",
+    "event_end": "Derived from the outcome timestamp.",
+    "waste_window_seconds": "Derived from the outcome timestamp.",
+    "seconds_to_next_failure": "Deterministic function of the (legacy) machine-minute label.",
+    "failure_within_horizon": "Legacy machine-minute target; not the prediction unit.",
+    "instance_name": "Instance identity; not a causal feature and can encode duplicates.",
+    "job_name": "Job identity leaks across sibling instances of the same failing job.",
+    "task_name": "Task identity leaks across sibling instances of the same failing task."
+  },
+  "notes": "Join machine-grid features only on (machine_id, time_stamp <= decision_time). Never use future grid rows."
+}
