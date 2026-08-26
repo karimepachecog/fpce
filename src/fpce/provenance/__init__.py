@@ -1,1 +1,1 @@
-"""Coefficient provenance helpers (SPEC Power envelope, etc.)."""
+"""Coefficient provenance helpers (SPEC Power envelope, Supercloud form check)."""

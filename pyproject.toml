@@ -15,6 +15,8 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "tqdm>=4.66",
     "numpy>=1.26",
+    "scikit-learn>=1.3",
+    "duckdb>=1.0",
 ]
 
 [project.optional-dependencies]
@@ -27,10 +29,15 @@ fpce-filter-instances = "fpce.ingest.filter_instances:main"
 fpce-build-parquet = "fpce.ingest.build_parquet:main"
 fpce-time-grid = "fpce.ingest.time_grid:main"
 fpce-instance-events = "fpce.ingest.instance_events:main"
+fpce-google-events = "fpce.ingest.google_events:main"
+fpce-google-quality = "fpce.ingest.google_quality:main"
 fpce-quality-report = "fpce.ingest.quality_report:main"
 fpce-freeze-split = "fpce.ingest.freeze_split:main"
 fpce-replay = "fpce.replay.stream:main"
 fpce-specpower = "fpce.provenance.specpower:main"
+fpce-supercloud = "fpce.provenance.supercloud:main"
+fpce-cross-provider = "fpce.model.cross_provider:main"
+fpce-operator-scale = "fpce.costing.coefficients:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

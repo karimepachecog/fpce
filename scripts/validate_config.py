@@ -17,6 +17,7 @@ from fpce.config import (
     RACK_SIZE,
     TRACE_DURATION_SECONDS,
     TRACE_FILES,
+    racks_of_kind,
 )
 from fpce.contracts import load_feature_contract
 from fpce.costing.coefficients import load_physical_cost_params, validation_warnings
@@ -72,12 +73,17 @@ def main() -> int:
     warnings: list[str] = []
 
     required_rack_keys = {"ids_path", "output_dir", "label"}
-    for name, cfg in RACKS.items():
+    for name, cfg in racks_of_kind("alibaba").items():
         missing = required_rack_keys - set(cfg)
         if missing:
             errors.append(f"RACKS[{name!r}] missing keys: {sorted(missing)}")
             continue
         errors.extend(validate_rack(name, cfg))
+
+    google = RACKS.get("google")
+    if google is not None:
+        if "output_dir" not in google or "label" not in google:
+            errors.append("RACKS['google'] must define output_dir and label")
 
     if FAILURE_STATUSES != {"Failed", "Interrupted"}:
         errors.append(
@@ -128,7 +134,7 @@ def main() -> int:
         return 1
 
     print("[ok] FPCE configuration validated")
-    print(f"  racks: {', '.join(RACKS)}")
+    print(f"  racks: {', '.join(racks_of_kind('alibaba'))}")
     print(f"  primary domain: {primary.get('failure_domain_1')}")
     print(f"  replication domain: {replication.get('failure_domain_1')}")
     print(f"  coefficients: {PHYSICAL_COST_TOML}")

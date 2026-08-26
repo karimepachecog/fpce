@@ -1,0 +1,72 @@
+{
+  "prediction_unit": "attempt",
+  "attempts_path": "data/processed/google/attempts.parquet",
+  "n_attempts": 67934800,
+  "n_instances": 16554757,
+  "n_trainable": 18591767,
+  "n_failed": 3395635,
+  "n_costable": 1180014,
+  "positive_rate_pct": 18.2642,
+  "start_imputed_rows": 2834674,
+  "start_imputed_frac": 0.0417,
+  "terminal_counts": {
+    "evicted": 21813708,
+    "killed": 27529325,
+    "succeeded": 15196132,
+    "failed": 3395635
+  },
+  "attempts_per_instance": {
+    "mean": 4.104,
+    "p50": 1.0,
+    "p95": 6.0,
+    "max": 22355,
+    "multi_attempt_frac": 0.2329
+  },
+  "waste_window_seconds_trainable": {
+    "min": 0.0,
+    "p50": 241.05,
+    "p95": 4660.08,
+    "mean": 1773.08
+  },
+  "costing_pool_by_threshold_seconds": {
+    "1": 3370438,
+    "10": 3251696,
+    "30": 2420843,
+    "60": 1180014,
+    "120": 1072894,
+    "300": 944643
+  },
+  "plan_cpu_frac_p50": 0.01041,
+  "plan_mem_frac_p50": 0.00726,
+  "notes": "Google ClusterData2019 cpus_request/memory_request are already fractions of the largest machine in the cell. Alibaba plan_cpu must be divided by 100 (hundredths of a core) then by cpu_num=96 before comparison. Memory has no equivalent physical divisor.",
+  "manifest": {
+    "source": "data/raw/google",
+    "n_shards": 1718,
+    "shard_bytes": 3559968790,
+    "shard_fingerprint": "062abb795421be935560f4e292e8522a9d4beb823fbd7b32f6b792d68b64b5ee",
+    "time_unit": "us",
+    "n_raw_events": 210978166,
+    "event_type_counts": {
+      "0": 71224841,
+      "3": 67735817,
+      "4": 22823754,
+      "5": 3771784,
+      "6": 15724897,
+      "7": 29697073
+    },
+    "n_attempts": 67934800,
+    "terminal_counts": {
+      "killed": 27529325,
+      "failed": 3395635,
+      "succeeded": 15196132,
+      "evicted": 21813708
+    },
+    "n_trainable": 18591767,
+    "n_failed": 3395635,
+    "n_costable": 1180014,
+    "output": "data/processed/google/attempts.parquet",
+    "output_sha256": "1872da3bc20d465b0e54480432699a93aa64037a6951009350a667c020324879",
+    "prediction_unit": "attempt",
+    "notes": "One row per Borg attempt (SCHEDULE \u2192 next terminal). attempt_index is the homolog of Alibaba seq_no. plan_cpu_frac/plan_mem_frac are ClusterData2019 fractions of the largest machine in the cell; do not mix with raw Alibaba plan_cpu."
+  }
+}

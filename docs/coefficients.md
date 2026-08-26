@@ -31,18 +31,24 @@ These are the only arithmetic Role C should implement. Signatures live in `src/f
 
 | Parameter | Range | Source |
 |-----------|-------|--------|
-| P_idle | 80–220 W | SPECpower_ssj2008 Active Idle envelope |
-| P_peak | 150–450 W | SPECpower_ssj2008 100% load envelope |
+| P_idle | 40.1–176.0 W | SPECpower_ssj2008 Active Idle, **per node**, 19 two-socket systems with 88–96 hardware threads |
+| P_peak | 241.0–650.0 W | SPECpower_ssj2008 100% load, same matched subset |
 
-SPEC curves bound a **sensitivity sweep** across comparable server classes. They are **not** mapped to individual Alibaba machines (hardware is anonymized).
+SPEC results with `# of Identical Nodes > 1` report **aggregate** watts. `fpce.provenance.specpower` divides by that count before computing the envelope. The matched filter is 2 sockets and ~96 hardware threads (Alibaba rack `cpu_num=96`, ±10%). The unfiltered 1,116-result envelope is far wider (idle 9–1,308 W) and is **not** what Role C should sweep: it mixes blades with four-socket machines.
 
-`sweep()` **drops** corners where `P_idle > P_peak` (4 of 16 unfiltered corners). The idle max (220 W) exceeds the peak min (150 W) because the envelope spans different server classes; pairing those two as if they were one machine is physically impossible.
+The previous registry values (idle 80–220 W, peak 150–450 W) did **not** come from `summarize_power_envelope()` despite citing it. `tests/test_provenance.py` now locks the TOML ranges to the parquet.
 
-Refresh envelope from scraped curves:
+Because the matched idle max (176 W) is below the matched peak min (241 W), `sweep()` currently keeps all 16 corners.
+
+Refresh:
 
 ```bash
-fpce-specpower --limit 15 --emit-params
+fpce-specpower --all --emit-params
 ```
+
+## Supercloud (form check only)
+
+`fpce-supercloud` downloads MIT Supercloud HPCA'22 `dcgm.csv` (~14 MB) and fits `P = a + b × u` to GPU (SM utilization, watts). On the current file this yields **R² = 0.79** (n = 95,182). That supports using the linear Fan et al. form; it does **not** supply Alibaba CPU coefficients. Do not copy those idle/peak numbers into this TOML.
 
 ## Facility energy (PUE)
 
@@ -62,6 +68,12 @@ Overhead energy = IT kWh × (PUE − 1). Report this separately from water.
 
 **Scope:** Onsite WUE only. WUE_source (offsite grid water) is out of scope.
 
+## Operator-declared PUE / WUE (not a Fan run)
+
+`[[operators]]` in the TOML holds cited fleet/portfolio averages (Google 2023 PUE 1.10; Microsoft FY24 PUE 1.16 / WUE 0.30 L/kWh; Meta 2023 PUE 1.08 / WUE 0.18 L/kWh; Equinix 2024 PUE 1.39 / WUE 0.95 L/kWh all-sites; AWS 2024 PUE 1.15 / WUE 0.15 L/kWh). Default costing still uses the LBNL ranges.
+
+`fpce-operator-scale` writes `reports/operator_coefficient_scale.json`. For a fixed IT kWh, facility energy scales with PUE and water with WUE (`vs_min` / `vs_max` = operator value ÷ LBNL range endpoint). This is **not** validation against measured facility water and **not** Role C's kWh/liter range.
+
 ## Sweep strategy
 
-`PhysicalCostParams.sweep()` returns the surviving min/max combinations of `(P_idle, P_peak, PUE, WUE)` with `P_idle ≤ P_peak` (12 corners with the current envelope). Role C reports cost as a range across these corners. PUE corners affect facility energy only; water depends on idle, peak, and WUE.
+`PhysicalCostParams.sweep()` returns the surviving min/max combinations of `(P_idle, P_peak, PUE, WUE)` with `P_idle ≤ P_peak`. With the matched envelope all 16 corners survive. Role C reports cost as a range across these corners. PUE corners affect facility energy only; water depends on idle, peak, and WUE.

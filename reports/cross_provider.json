@@ -1,0 +1,72 @@
+{
+  "features": [
+    "plan_cpu_frac",
+    "plan_mem_frac",
+    "retry_index"
+  ],
+  "excluded": [
+    "machine_id"
+  ],
+  "n_train": 200000,
+  "train_positive_rate_pct": 9.001,
+  "notes": "Headline metrics are ROC-AUC / PR-AUC / lift. F1 at threshold 0.5 is reported as confounded by the ~109\u00d7 prevalence gap. machine_id is never a cross-provider feature.",
+  "alibaba_test": {
+    "n": 3974412,
+    "positive_rate_pct": 0.0951,
+    "roc_auc": 0.6107,
+    "pr_auc": 0.0991,
+    "lift": 104.222,
+    "at_0_5": {
+      "n": 3974412,
+      "positive_rate_pct": 0.0951,
+      "threshold": 0.5,
+      "precision": 0.0623,
+      "recall": 0.1975,
+      "f1": 0.0947,
+      "confounded_by_prevalence": false
+    }
+  },
+  "google": {
+    "n": 1000111,
+    "positive_rate_pct": 18.2776,
+    "roc_auc": 0.5095,
+    "pr_auc": 0.2101,
+    "lift": 1.1494,
+    "at_0_5": {
+      "n": 1000111,
+      "positive_rate_pct": 18.2776,
+      "threshold": 0.5,
+      "precision": 0.2356,
+      "recall": 0.8184,
+      "f1": 0.3659,
+      "confounded_by_prevalence": true
+    }
+  },
+  "roc_auc_drop": 0.1012,
+  "lift_drop": 103.0726,
+  "f1_at_0_5": {
+    "alibaba_test": 0.0947,
+    "google": 0.3659,
+    "note": "confounded by prevalence; do not cite as shift"
+  },
+  "google_equalized_prevalence": {
+    "n": 898158,
+    "positive_rate_pct": 9.001,
+    "roc_auc": 0.5092,
+    "pr_auc": 0.1128,
+    "lift": 1.253,
+    "target_positive_rate_pct": 9.001,
+    "calibrated_threshold": 0.1673,
+    "at_calibrated_threshold": {
+      "n": 898158,
+      "positive_rate_pct": 9.001,
+      "threshold": 0.1673,
+      "precision": 0.1088,
+      "recall": 0.8265,
+      "f1": 0.1923,
+      "confounded_by_prevalence": false
+    }
+  },
+  "role": "A_adapter_smoke_test",
+  "google_path": "data/processed/google/attempts_sample.parquet"
+}

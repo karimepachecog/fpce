@@ -1,0 +1,104 @@
+{
+  "notes": "For a fixed IT kWh, facility energy scales with PUE and water with WUE. vs_min / vs_max are operator_value / LBNL_range_endpoint. This is not a Fan et al. costing run and not ground-truth validation.",
+  "lbnl": {
+    "pue_min": 1.15,
+    "pue_max": 1.4,
+    "wue_l_per_kwh_min": 0.45,
+    "wue_l_per_kwh_max": 0.48,
+    "reference_pue": "Shehabi et al. (2024), LBNL-2001637, Figure 4.6: U.S. average PUE ~1.4 in 2023; 2028 scenario range 1.15\u20131.35",
+    "reference_wue": "Shehabi et al. (2024), LBNL-2001637, Figure 4.7: U.S. average site WUE 0.45\u20130.48 L/kWh after 2023"
+  },
+  "operators": [
+    {
+      "id": "google_2023",
+      "name": "Google",
+      "year": 2023,
+      "pue": 1.1,
+      "wue_l_per_kwh": null,
+      "scope": "Fleet-wide average annual PUE, Google-owned and -operated data centers, calendar 2023",
+      "reference": "Google 2024 Environmental Report, Figure 3",
+      "url": "https://www.gstatic.com/gumdrop/sustainability/google-2024-environmental-report.pdf",
+      "notes": "No single fleet WUE in this report. Campus PUEs are tabulated in the same PDF.",
+      "facility_kwh_scale_vs_lbnl": {
+        "vs_min": 0.9565,
+        "vs_max": 0.7857
+      }
+    },
+    {
+      "id": "microsoft_fy24",
+      "name": "Microsoft",
+      "year": 2024,
+      "pue": 1.16,
+      "wue_l_per_kwh": 0.3,
+      "scope": "Global average, Microsoft-owned and -controlled datacenters operational 12 months; FY24 (1 Jul 2023 \u2013 30 Jun 2024)",
+      "reference": "Microsoft Datacenters, Measuring energy and water efficiency (PUE/WUE table, Global FY24)",
+      "url": "https://datacenters.microsoft.com/sustainability/efficiency/",
+      "notes": "Operational PUE/WUE. The 2024 Environmental Sustainability Report separately states a design PUE of 1.12; this profile uses the FY24 operational global averages.",
+      "facility_kwh_scale_vs_lbnl": {
+        "vs_min": 1.0087,
+        "vs_max": 0.8286
+      },
+      "water_liters_scale_vs_lbnl": {
+        "vs_min": 0.6667,
+        "vs_max": 0.625
+      }
+    },
+    {
+      "id": "meta_2023",
+      "name": "Meta",
+      "year": 2023,
+      "pue": 1.08,
+      "wue_l_per_kwh": 0.18,
+      "scope": "Operational data centers, calendar 2023 average",
+      "reference": "Meta 2024 Sustainability Report (covers FY 2023); Environmental Data Index PUE/WUE tables",
+      "url": "https://sustainability.atmeta.com/wp-content/uploads/2024/08/Meta-2024-Sustainability-Report.pdf",
+      "notes": "WUE = water withdrawal (L) / IT electricity (kWh), as defined in Meta's Environmental Data Index.",
+      "facility_kwh_scale_vs_lbnl": {
+        "vs_min": 0.9391,
+        "vs_max": 0.7714
+      },
+      "water_liters_scale_vs_lbnl": {
+        "vs_min": 0.4,
+        "vs_max": 0.375
+      }
+    },
+    {
+      "id": "equinix_2024",
+      "name": "Equinix",
+      "year": 2024,
+      "pue": 1.39,
+      "wue_l_per_kwh": 0.95,
+      "scope": "Annual average, entire global colocation portfolio, 2024",
+      "reference": "Equinix 2024 Sustainability Data Summary; FY 2024 Form 10-K sustainability metrics table",
+      "url": "https://www.equinix.com/resources/data-sheets/sustainability-data-summary",
+      "notes": "WUE 0.95 is the all-sites average (evaporative-only sites were 1.55). Equinix reports WUE as m\u00b3/MWh, which equals L/kWh.",
+      "facility_kwh_scale_vs_lbnl": {
+        "vs_min": 1.2087,
+        "vs_max": 0.9929
+      },
+      "water_liters_scale_vs_lbnl": {
+        "vs_min": 2.1111,
+        "vs_max": 1.9792
+      }
+    },
+    {
+      "id": "aws_2024",
+      "name": "AWS",
+      "year": 2024,
+      "pue": 1.15,
+      "wue_l_per_kwh": 0.15,
+      "scope": "Global AWS data centers, calendar 2024",
+      "reference": "2024 Amazon Sustainability Report, AWS Summary (global PUE 1.15; WUE 0.15 L/kWh)",
+      "url": "https://sustainability.aboutamazon.com/2024-amazon-sustainability-report-aws-summary.pdf",
+      "notes": "WUE improved 17% vs 2023 per the same summary.",
+      "facility_kwh_scale_vs_lbnl": {
+        "vs_min": 1.0,
+        "vs_max": 0.8214
+      },
+      "water_liters_scale_vs_lbnl": {
+        "vs_min": 0.3333,
+        "vs_max": 0.3125
+      }
+    }
+  ]
+}

@@ -8,7 +8,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from fpce.config import DATA_PROCESSED, RACKS, REPORTS_DIR
+from fpce.config import REPORTS_DIR, racks_of_kind
+from fpce.ingest.instance_events import COSTING_WINDOW_THRESHOLDS, costing_pool_by_threshold
 
 
 def pct_null(df: pd.DataFrame) -> dict[str, float]:
@@ -16,7 +17,8 @@ def pct_null(df: pd.DataFrame) -> dict[str, float]:
 
 
 def build_report(rack_name: str) -> dict:
-    rack_cfg = RACKS[rack_name]
+    racks = racks_of_kind("alibaba")
+    rack_cfg = racks[rack_name]
     output_dir = Path(rack_cfg["output_dir"])
 
     usage = pd.read_parquet(output_dir / "machine_usage.parquet")
@@ -75,6 +77,14 @@ def build_report(rack_name: str) -> dict:
                 if events["waste_window_seconds"].dropna().empty
                 else round(float(events["waste_window_seconds"].median()), 2)
             ),
+            "costing_pool_by_threshold_seconds": costing_pool_by_threshold(
+                events, COSTING_WINDOW_THRESHOLDS
+            ),
+            "imputed_upper_bound_rows": (
+                int(events["waste_window_imputed"].sum())
+                if "waste_window_imputed" in events.columns
+                else 0
+            ),
         }
     return report
 
@@ -83,7 +93,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate data quality report")
     parser.add_argument(
         "--rack",
-        choices=list(RACKS.keys()),
+        choices=list(racks_of_kind("alibaba")),
         action="append",
         default=None,
     )
@@ -94,7 +104,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    rack_names = args.rack or list(RACKS.keys())
+    rack_names = args.rack or list(racks_of_kind("alibaba"))
     report = {
         "racks": {name: build_report(name) for name in rack_names},
     }

@@ -20,7 +20,20 @@ The second rack is a **replication** check, not an out-of-distribution test. Sam
 
 Trainable = `Failed`/`Interrupted`/`Terminated`. Censored (still running at trace end): 113,858 primary / 112,361 replication.
 
-Costing-eligible = failed **and** waste window ≥ 60 s. Most failed instances have `end_time=0` (failure time unknown) or a sub-minute lifetime; those stay in the classifier set but are excluded from kWh/liter estimates. Median waste window across all instances is 10 s — the costing set is the long-running tail, which is the only place a kill-at-admission policy can save measurable energy.
+Costing-eligible = failed **and** measured waste window ≥ 60 s **and** not imputed. Most failed instances have `end_time=0` (failure time unknown) or a sub-minute lifetime; those stay in the classifier set but are excluded from kWh/liter estimates. Median waste window across all instances is 10 s — the costing set is the long-running tail, which is the only place a kill-at-admission policy can save measurable energy.
+
+Measured costing pool vs minimum waste window (primary / replication):
+
+| Threshold | Primary | Replication |
+|-----------|---------|-------------|
+| ≥ 1 s | 14,585 | 14,882 |
+| ≥ 10 s | 6,879 | 7,116 |
+| ≥ 30 s | 5,258 | 5,447 |
+| ≥ 60 s (default) | 4,924 | 5,123 |
+| ≥ 120 s | 3,848 | 3,966 |
+| ≥ 300 s | 2,389 | 2,455 |
+
+Failed instances with `end_time=0` but a parent-task end: **5,303** primary / **5,321** replication. Those carry `waste_window_upper_bound_seconds` and `waste_window_imputed=1`. They are **not** in `eligible_for_costing`. The replication rack's 5,123 costing-eligible failures may be used as an extra costing pool only after primary-rack evaluation is frozen.
 
 Always-predict-1 precision at this target is **0.17%**, not 37%. That is why the unit of analysis moved.
 

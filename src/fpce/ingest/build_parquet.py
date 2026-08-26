@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from fpce.config import DATA_INTERIM, DATA_PROCESSED, DATA_RAW, RACKS
+from fpce.config import DATA_INTERIM, DATA_PROCESSED, DATA_RAW, RACKS, racks_of_kind
 from fpce.io import clean_trace_df, write_parquet
 
 
@@ -112,10 +112,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build processed Parquet tables")
     parser.add_argument(
         "--rack",
-        choices=list(RACKS.keys()),
+        choices=list(racks_of_kind("alibaba")),
         action="append",
         default=None,
-        help="Rack(s) to build (default: all configured racks)",
+        help="Rack(s) to build (default: all Alibaba racks)",
     )
     parser.add_argument(
         "--instance-csv",
@@ -125,7 +125,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    rack_names = args.rack or list(RACKS.keys())
+    rack_names = args.rack or list(racks_of_kind("alibaba"))
     for rack_name in rack_names:
         print(f"[build] rack={rack_name}")
         interim = args.instance_csv if len(rack_names) == 1 else None

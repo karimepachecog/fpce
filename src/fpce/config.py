@@ -26,13 +26,43 @@ RACKS: dict[str, dict[str, Path | str]] = {
         "ids_path": RACK_IDS_PATH,
         "output_dir": DATA_PROCESSED / "primary",
         "label": "primary training rack (failure domain 51)",
+        "kind": "alibaba",
     },
     "replication": {
         "ids_path": REPLICATION_RACK_IDS_PATH,
         "output_dir": DATA_PROCESSED / "replication",
         "label": "held-out replication rack (failure domain 52, same window and hardware)",
+        "kind": "alibaba",
+    },
+    "google": {
+        "ids_path": DATA_PROCESSED / "google" / "export_manifest.json",
+        "output_dir": DATA_PROCESSED / "google",
+        "label": "Google cluster-data 2019 BigQuery export (cross-provider)",
+        "kind": "external",
     },
 }
+
+
+def racks_of_kind(kind: str = "alibaba") -> dict[str, dict[str, Path | str]]:
+    """Subset of RACKS. Ingest CLIs default to Alibaba; Google is opt-in."""
+    return {name: cfg for name, cfg in RACKS.items() if cfg.get("kind", "alibaba") == kind}
+
+
+def repo_relpath(path: Path | str) -> str:
+    """POSIX path relative to the repo root, for JSON that other clones will read."""
+    resolved = Path(path).resolve()
+    try:
+        return resolved.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        return Path(path).as_posix()
+
+
+def resolve_repo_path(path: Path | str) -> Path:
+    """Interpret a stored path as relative to PROJECT_ROOT unless it is absolute."""
+    candidate = Path(path)
+    if candidate.is_absolute():
+        return candidate
+    return PROJECT_ROOT / candidate
 
 # Beijing public mirror (local DNS may fail; download.py resolves via 8.8.8.8)
 OSS_BASE_URL = "http://clusterdata2018pubcn.oss-cn-beijing.aliyuncs.com"
@@ -132,6 +162,17 @@ NORMALIZED_COLUMNS = {
 RACK_SIZE = 40
 TRACE_DURATION_SECONDS = 8 * 24 * 3600  # 8 days
 RESAMPLE_INTERVAL_SECONDS = 60
+
+# Alibaba plan_cpu is hundredths of a core. Homogeneous rack machines report cpu_num=96,
+# so plan_cpu / 100 / 96 is a fraction of the machine — the same unit as Google
+# ClusterData2019 resource_request.cpus (fraction of the largest machine in the cell).
+ALI_CPU_NUM = 96
+ALI_PLAN_CPU_HUNDREDTHS = 100.0
+
+GOOGLE_RAW_DIR = DATA_RAW / "google"
+GOOGLE_ATTEMPTS_NAME = "attempts.parquet"
+GOOGLE_ATTEMPTS_SAMPLE_NAME = "attempts_sample.parquet"
+GOOGLE_MANIFEST_NAME = "export_manifest.json"
 
 # Instance statuses that imply the workload is still occupying the machine.
 ACTIVE_STATUSES = {"Running", "Ready", "Waiting"}

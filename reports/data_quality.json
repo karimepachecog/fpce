@@ -78,7 +78,16 @@
         "trainable_positive_rate_pct": 0.1679,
         "costing_rows": 4924,
         "censored_rows": 113858,
-        "median_waste_window_seconds": 10.0
+        "median_waste_window_seconds": 10.0,
+        "costing_pool_by_threshold_seconds": {
+          "1": 14585,
+          "10": 6879,
+          "30": 5258,
+          "60": 4924,
+          "120": 3848,
+          "300": 2389
+        },
+        "imputed_upper_bound_rows": 5303
       }
     },
     "replication": {
@@ -159,7 +168,16 @@
         "trainable_positive_rate_pct": 0.1695,
         "costing_rows": 5123,
         "censored_rows": 112361,
-        "median_waste_window_seconds": 10.0
+        "median_waste_window_seconds": 10.0,
+        "costing_pool_by_threshold_seconds": {
+          "1": 14882,
+          "10": 7116,
+          "30": 5447,
+          "60": 5123,
+          "120": 3966,
+          "300": 2455
+        },
+        "imputed_upper_bound_rows": 5321
       }
     }
   }

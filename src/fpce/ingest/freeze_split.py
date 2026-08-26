@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from fpce.config import DATA_PROCESSED, RACKS, TRAIN_FRACTION
+from fpce.config import DATA_PROCESSED, TRAIN_FRACTION, racks_of_kind, repo_relpath
 
 
 def make_time_split(
@@ -23,7 +23,7 @@ def make_time_split(
 
     train = grid["time_stamp"] < split_at
     payload: dict = {
-        "grid_path": str(grid_path),
+        "grid_path": repo_relpath(grid_path),
         "time_min": t_min,
         "time_max": t_max,
         "split_timestamp": split_at,
@@ -44,7 +44,7 @@ def make_time_split(
         )
         inst_train = events["start_time"] < split_at
         trainable = events["eligible_for_training"] == 1
-        payload["instance_events_path"] = str(instance_path)
+        payload["instance_events_path"] = repo_relpath(instance_path)
         payload["instance_train_rows"] = int(inst_train.sum())
         payload["instance_test_rows"] = int((~inst_train).sum())
         payload["instance_train_positive_rate"] = round(
@@ -65,11 +65,11 @@ def make_time_split(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Freeze time-based train/test split")
-    parser.add_argument("--rack", choices=list(RACKS.keys()), default="primary")
+    parser.add_argument("--rack", choices=list(racks_of_kind("alibaba")), default="primary")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
-    rack_cfg = RACKS[args.rack]
+    rack_cfg = racks_of_kind("alibaba")[args.rack]
     output_dir = Path(rack_cfg["output_dir"])
     grid_path = output_dir / "time_grid.parquet"
     instance_path = output_dir / "instance_events.parquet"

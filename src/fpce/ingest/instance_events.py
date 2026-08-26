@@ -15,15 +15,46 @@ import pandas as pd
 
 from fpce.config import (
     ACTIVE_STATUSES,
+    ALI_CPU_NUM,
+    ALI_PLAN_CPU_HUNDREDTHS,
     DECISION_OFFSET_SECONDS,
     FAILURE_STATUSES,
     MIN_WASTE_WINDOW_SECONDS,
-    RACKS,
     SUCCESS_STATUSES,
+    racks_of_kind,
 )
 from fpce.io import write_parquet
 
-TASK_COLS = ["job_name", "task_name", "plan_cpu", "plan_mem", "instance_num"]
+COSTING_WINDOW_THRESHOLDS = (1, 10, 30, 60, 120, 300)
+
+
+def _join_tasks(instances: pd.DataFrame, tasks: pd.DataFrame) -> pd.DataFrame:
+    """Attach plan columns and parent-task timestamps (for waste-window upper bound)."""
+    named: dict[str, tuple[str, str]] = {}
+    for out_col, src_col, how in (
+        ("plan_cpu", "plan_cpu", "first"),
+        ("plan_mem", "plan_mem", "first"),
+        ("instance_num", "instance_num", "first"),
+        ("task_start_time", "start_time", "min"),
+        ("task_end_time", "end_time", "max"),
+    ):
+        if src_col in tasks.columns:
+            named[out_col] = (src_col, how)
+    if not named:
+        return instances
+    grouped = tasks.groupby(["job_name", "task_name"], as_index=False).agg(**named)
+    return instances.merge(grouped, on=["job_name", "task_name"], how="left")
+
+
+def costing_pool_by_threshold(
+    events: pd.DataFrame,
+    thresholds: tuple[int, ...] = COSTING_WINDOW_THRESHOLDS,
+) -> dict[str, int]:
+    """Count failed instances whose *measured* waste window meets each threshold."""
+    failed = events["outcome"] == "failed"
+    waste = pd.to_numeric(events["waste_window_seconds"], errors="coerce")
+    measured = failed & (events.get("waste_window_imputed", 0).fillna(0) == 0)
+    return {str(t): int((measured & (waste >= t)).sum()) for t in thresholds}
 
 
 def _effective_end(status: pd.Series, start: pd.Series, end: pd.Series) -> pd.Series:
@@ -48,10 +79,9 @@ def build_instance_events(
     """Return one row per batch instance with label, decision time, and waste window."""
     out = instances.copy()
     if tasks is not None and not tasks.empty:
-        task_keys = tasks[TASK_COLS].drop_duplicates(subset=["job_name", "task_name"])
-        out = out.merge(task_keys, on=["job_name", "task_name"], how="left")
+        out = _join_tasks(out, tasks)
     else:
-        for col in ("plan_cpu", "plan_mem", "instance_num"):
+        for col in ("plan_cpu", "plan_mem", "instance_num", "task_start_time", "task_end_time"):
             if col not in out.columns:
                 out[col] = pd.NA
 
@@ -67,11 +97,34 @@ def build_instance_events(
     waste = pd.to_numeric(out["event_end"], errors="coerce") - out["decision_time"]
     out["waste_window_seconds"] = waste.clip(lower=0)
 
+    recorded_end = pd.to_numeric(out["end_time"], errors="coerce").fillna(0)
+    if "task_end_time" not in out.columns:
+        out["task_end_time"] = pd.NA
+    if "task_start_time" not in out.columns:
+        out["task_start_time"] = pd.NA
+    task_end = pd.to_numeric(out["task_end_time"], errors="coerce")
+    task_bound = (task_end - out["decision_time"]).clip(lower=0)
+    out["waste_window_upper_bound_seconds"] = task_bound.where(
+        task_bound.notna(), out["waste_window_seconds"]
+    )
+    # Imputed only for failed instances with no recorded end and a parent-task bound.
+    out["waste_window_imputed"] = (
+        (out["outcome"] == "failed")
+        & (recorded_end <= 0)
+        & task_bound.notna()
+        & (task_bound > 0)
+    ).astype("int8")
+
+    plan_cpu = pd.to_numeric(out["plan_cpu"], errors="coerce")
+    out["plan_cpu_frac"] = plan_cpu / ALI_PLAN_CPU_HUNDREDTHS / ALI_CPU_NUM
+    out["plan_mem_frac"] = pd.to_numeric(out["plan_mem"], errors="coerce")
+
     out["eligible_for_training"] = out["outcome"].isin(["failed", "succeeded"]).astype("int8")
     out["eligible_for_costing"] = (
         (out["outcome"] == "failed")
         & out["waste_window_seconds"].notna()
         & (out["waste_window_seconds"] >= min_waste_window)
+        & (out["waste_window_imputed"] == 0)
     ).astype("int8")
 
     keep = [
@@ -84,6 +137,8 @@ def build_instance_events(
         "total_seq_no",
         "plan_cpu",
         "plan_mem",
+        "plan_cpu_frac",
+        "plan_mem_frac",
         "instance_num",
         "start_time",
         "end_time",
@@ -97,6 +152,10 @@ def build_instance_events(
         "decision_time",
         "event_end",
         "waste_window_seconds",
+        "waste_window_upper_bound_seconds",
+        "waste_window_imputed",
+        "task_start_time",
+        "task_end_time",
         "eligible_for_training",
         "eligible_for_costing",
     ]
@@ -105,7 +164,10 @@ def build_instance_events(
 
 
 def build_rack_instance_events(rack: str) -> pd.DataFrame:
-    output_dir = Path(RACKS[rack]["output_dir"])
+    racks = racks_of_kind("alibaba")
+    if rack not in racks:
+        raise KeyError(f"rack {rack!r} is not an Alibaba ingest target")
+    output_dir = Path(racks[rack]["output_dir"])
     instances = pd.read_parquet(output_dir / "batch_instance.parquet")
     tasks_path = output_dir / "batch_task.parquet"
     tasks = pd.read_parquet(tasks_path) if tasks_path.exists() else None
@@ -114,12 +176,13 @@ def build_rack_instance_events(rack: str) -> pd.DataFrame:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build instance-level prediction events")
-    parser.add_argument("--rack", choices=list(RACKS.keys()), default="primary")
+    parser.add_argument("--rack", choices=list(racks_of_kind("alibaba")), default="primary")
     parser.add_argument("--output", type=Path, default=None)
     args = parser.parse_args()
 
     events = build_rack_instance_events(args.rack)
-    out_path = args.output or (Path(RACKS[args.rack]["output_dir"]) / "instance_events.parquet")
+    racks = racks_of_kind("alibaba")
+    out_path = args.output or (Path(racks[args.rack]["output_dir"]) / "instance_events.parquet")
     write_parquet(events, out_path)
 
     n = len(events)

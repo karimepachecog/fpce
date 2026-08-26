@@ -53,13 +53,38 @@ def test_load_default_params() -> None:
     assert "cooling_share" not in params.raw
 
 
+def test_operator_profiles_are_cited_and_scale_vs_lbnl() -> None:
+    from fpce.costing.coefficients import (
+        load_operator_profiles,
+        operator_scale_vs_national,
+    )
+
+    profiles = load_operator_profiles()
+    ids = {p.id for p in profiles}
+    assert {"google_2023", "microsoft_fy24", "meta_2023", "equinix_2024", "aws_2024"} <= ids
+    google = next(p for p in profiles if p.id == "google_2023")
+    assert google.pue == 1.10
+    assert google.wue_l_per_kwh is None
+    assert google.reference
+    meta = next(p for p in profiles if p.id == "meta_2023")
+    assert meta.wue_l_per_kwh == 0.18
+    report = operator_scale_vs_national()
+    by_id = {row["id"]: row for row in report["operators"]}
+    assert "facility_kwh_scale_vs_lbnl" in by_id["google_2023"]
+    assert "water_liters_scale_vs_lbnl" not in by_id["google_2023"]
+    water = by_id["meta_2023"]["water_liters_scale_vs_lbnl"]
+    assert water["vs_min"] == pytest.approx(0.18 / 0.45, rel=1e-3)
+    assert water["vs_max"] == pytest.approx(0.18 / 0.48, rel=1e-3)
+
+
 def test_sweep_drops_idle_above_peak() -> None:
     params = load_physical_cost_params()
     corners = params.sweep()
     assert corners
     assert all(c["p_idle_watts"] <= c["p_peak_watts"] for c in corners)
-    # Unfiltered 2^4 = 16; (idle_max, peak_min) = (220, 150) is invalid → 12
-    assert len(corners) == 12
+    n_unfiltered = 16
+    dropped = 4 if params.p_idle_watts.max > params.p_peak_watts.min else 0
+    assert len(corners) == n_unfiltered - dropped
 
 
 def test_pue_and_wue_are_independent_sweep_axes() -> None:

@@ -1,24 +1,26 @@
-schema_version = 2
+schema_version = 3
 
 [power_model]
 form = "P = P_idle + (P_peak - P_idle) * utilization"
 reference = "Fan, Weber, Barroso (2007), ISCA '07"
-notes = "utilization is CPU fraction in [0, 1]. Sweep only physically consistent (P_idle <= P_peak) corners; the envelope spans server classes, not a single machine."
+notes = "utilization is CPU fraction in [0, 1]. Envelope is per-node SPECpower_ssj2008 watts, filtered to 2-socket servers with ~96 hardware threads (Alibaba rack cpu_num=96). Combinations with P_idle > P_peak are dropped."
 
 [power_model.p_idle_watts]
-min = 80.0
-max = 220.0
+min = 40.1
+max = 176.0
 unit = "W"
-basis = "SPECpower_ssj2008 Active Idle envelope across comparable server classes (not per-machine mapping)"
-reference = "fpce.provenance.specpower summarize_power_envelope()"
+basis = "SPECpower_ssj2008 Active Idle, per-node (aggregate watts / identical_nodes). 19 two-socket systems with 88–96 hardware threads (target 96 ±10%). Not a per-machine mapping of the Alibaba rack."
+reference = "fpce.provenance.specpower summarize_matched_envelope()"
+n_systems = 19
 status = "verified"
 
 [power_model.p_peak_watts]
-min = 150.0
-max = 450.0
+min = 241.0
+max = 650.0
 unit = "W"
-basis = "SPECpower_ssj2008 100% load envelope across comparable server classes (not per-machine mapping)"
-reference = "fpce.provenance.specpower summarize_power_envelope()"
+basis = "SPECpower_ssj2008 100% load, per-node (aggregate watts / identical_nodes). Same 19-system matched subset as p_idle_watts."
+reference = "fpce.provenance.specpower summarize_matched_envelope()"
+n_systems = 19
 status = "verified"
 
 [facility.pue]
@@ -48,3 +50,61 @@ it_energy_kwh = "integral of Fan et al. power over the waste window, converted W
 facility_energy_kwh = "it_energy_kwh * PUE"
 water_liters = "it_energy_kwh * WUE"
 notes = "Cooling share of IT power is intentionally omitted: WUE is already denominated in IT energy, so multiplying by a cooling share would double-count."
+
+# Operator-declared PUE/WUE. Default costing still uses the LBNL ranges above.
+# These are fleet or portfolio averages, not a validation of the Alibaba rack.
+# Role A reports only the multiplicative scale vs LBNL (same IT kWh). Role C runs Fan.
+
+[[operators]]
+id = "google_2023"
+name = "Google"
+year = 2023
+pue = 1.10
+scope = "Fleet-wide average annual PUE, Google-owned and -operated data centers, calendar 2023"
+reference = "Google 2024 Environmental Report, Figure 3"
+url = "https://www.gstatic.com/gumdrop/sustainability/google-2024-environmental-report.pdf"
+notes = "No single fleet WUE in this report. Campus PUEs are tabulated in the same PDF."
+
+[[operators]]
+id = "microsoft_fy24"
+name = "Microsoft"
+year = 2024
+pue = 1.16
+wue_l_per_kwh = 0.30
+scope = "Global average, Microsoft-owned and -controlled datacenters operational 12 months; FY24 (1 Jul 2023 – 30 Jun 2024)"
+reference = "Microsoft Datacenters, Measuring energy and water efficiency (PUE/WUE table, Global FY24)"
+url = "https://datacenters.microsoft.com/sustainability/efficiency/"
+notes = "Operational PUE/WUE. The 2024 Environmental Sustainability Report separately states a design PUE of 1.12; this profile uses the FY24 operational global averages."
+
+[[operators]]
+id = "meta_2023"
+name = "Meta"
+year = 2023
+pue = 1.08
+wue_l_per_kwh = 0.18
+scope = "Operational data centers, calendar 2023 average"
+reference = "Meta 2024 Sustainability Report (covers FY 2023); Environmental Data Index PUE/WUE tables"
+url = "https://sustainability.atmeta.com/wp-content/uploads/2024/08/Meta-2024-Sustainability-Report.pdf"
+notes = "WUE = water withdrawal (L) / IT electricity (kWh), as defined in Meta's Environmental Data Index."
+
+[[operators]]
+id = "equinix_2024"
+name = "Equinix"
+year = 2024
+pue = 1.39
+wue_l_per_kwh = 0.95
+scope = "Annual average, entire global colocation portfolio, 2024"
+reference = "Equinix 2024 Sustainability Data Summary; FY 2024 Form 10-K sustainability metrics table"
+url = "https://www.equinix.com/resources/data-sheets/sustainability-data-summary"
+notes = "WUE 0.95 is the all-sites average (evaporative-only sites were 1.55). Equinix reports WUE as m³/MWh, which equals L/kWh."
+
+[[operators]]
+id = "aws_2024"
+name = "AWS"
+year = 2024
+pue = 1.15
+wue_l_per_kwh = 0.15
+scope = "Global AWS data centers, calendar 2024"
+reference = "2024 Amazon Sustainability Report, AWS Summary (global PUE 1.15; WUE 0.15 L/kWh)"
+url = "https://sustainability.aboutamazon.com/2024-amazon-sustainability-report-aws-summary.pdf"
+notes = "WUE improved 17% vs 2023 per the same summary."

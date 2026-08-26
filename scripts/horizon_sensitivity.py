@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from fpce.config import RACKS
+from fpce.config import RACKS, racks_of_kind
 
 
 def horizon_rates(grid_path: Path, horizons_seconds: list[int]) -> dict[int, float]:
@@ -34,13 +34,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--rack",
-        choices=list(RACKS.keys()),
+        choices=list(racks_of_kind("alibaba")),
         action="append",
         default=None,
     )
     args = parser.parse_args()
 
-    rack_names = args.rack or list(RACKS.keys())
+    rack_names = args.rack or list(racks_of_kind("alibaba"))
     print("Horizon sensitivity (failure_within_horizon proxy from seconds_to_next_failure)")
     print(f"{'rack':<10} {'horizon':<12} {'rate_pct':<10}")
     print("-" * 34)

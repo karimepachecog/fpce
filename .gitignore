@@ -13,13 +13,17 @@ data/interim/
 data/processed/**/*.parquet
 data/processed/**/time_grid_chunks/
 
-# Keep small contract JSONs tracked
+# Keep small contract JSONs and the SPEC envelope (provenance lock) tracked
 !data/processed/rack_machine_ids.json
 !data/processed/replication_rack_machine_ids.json
 !data/processed/*_time_split.json
+!data/processed/spec_power_curves.parquet
+!data/processed/google/export_manifest.json
+!data/processed/HANDOFF.md
 
 # Quality JSON is a Role A deliverable; keep it tracked
 !reports/data_quality.json
+!reports/google_quality.json
 
 # Literature PDFs (local reading copies; not required to run the pipeline)
 state-of-the-art/*.pdf

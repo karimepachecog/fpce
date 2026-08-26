@@ -14,6 +14,7 @@ Gradient-boosted classifier on admission-time instance features plus a short hos
 - Always-predict-0 and always-predict-1 as dumb baselines (positive rate is ~0.17%, so always-1 is no longer a strong baseline)
 - Lead-time distribution: `baseline_fire_time - decision_time` for true positives that are `eligible_for_costing`
 - Single replication pass on the failure-domain-52 rack (report regardless of outcome; same window and hardware — replication, not distribution shift)
+- Optional cross-provider pass: `fpce-cross-provider` after `fpce-google-events` ([docs/google_export.md](../../../docs/google_export.md)). Use `plan_cpu_frac` / `plan_mem_frac`; report ROC-AUC / PR-AUC / lift, not F1 at 0.5, as the headline shift metric.
 
 ## Outputs for Role C (electrical engineer)
 

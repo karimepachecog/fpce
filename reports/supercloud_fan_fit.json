@@ -1,0 +1,17 @@
+{
+  "n": 95182,
+  "p_idle_watts": 30.000770561344996,
+  "p_peak_watts": 180.8331024529947,
+  "slope_watts": 150.8323318916497,
+  "r_squared": 0.7923085055853119,
+  "mae_watts": 15.322645801913893,
+  "rmse_watts": 22.880407022593364,
+  "u_mean": 0.25294656552709543,
+  "p_mean": 68.15329088378054,
+  "source": "data/raw/supercloud/dcgm.csv",
+  "utilization_column": "smutilization_pct_avg",
+  "power_column": "powerusage_watts_avg",
+  "hardware": "GPU (nvidia DCGM); NOT Alibaba CPU servers",
+  "transfers_coefficients": false,
+  "note": "Validates the linear Fan et al. form on measured GPU power. Do not copy p_idle/p_peak into physical_cost.toml."
+}

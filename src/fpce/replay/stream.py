@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from fpce.config import DATA_PROCESSED, RACKS
+from fpce.config import DATA_PROCESSED, RACKS, racks_of_kind
 
 
 def replay_stream(
@@ -62,7 +62,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--rack",
-        choices=list(RACKS.keys()),
+        choices=list(racks_of_kind("alibaba")),
         default=None,
         help="Use time_grid.parquet for this rack (overrides --grid default)",
     )

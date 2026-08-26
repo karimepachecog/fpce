@@ -16,8 +16,10 @@
 from fpce.costing.coefficients import load_physical_cost_params
 
 params = load_physical_cost_params()
-corners = params.sweep()  # drops P_idle > P_peak
+corners = params.sweep()  # currently 16; drops P_idle > P_peak if the envelope ever overlaps
 ```
+
+Operator-declared PUE/WUE (`fpce-operator-scale`) live in `[[operators]]`. They do **not** replace the LBNL default ranges. `operator_scale_vs_national()` reports how water and facility energy would scale for the same IT kWh. Role C still implements the Fan integral.
 
 ## Translation layer (Role C to implement)
 

@@ -16,6 +16,7 @@ from fpce.config import (
     FAILURE_STATUSES,
     RACKS,
     RESAMPLE_INTERVAL_SECONDS,
+    racks_of_kind,
 )
 from fpce.io import write_parquet
 
@@ -276,7 +277,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Build resampled time grid")
     parser.add_argument(
         "--rack",
-        choices=list(RACKS.keys()),
+        choices=list(racks_of_kind("alibaba")),
         default="primary",
         help="Rack to build time grid for",
     )
