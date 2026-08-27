@@ -2,7 +2,7 @@
 
 **Subtitle:** Linking doomed-workload detection to the physical cost of inaction.
 
-**Authors:** Karime Pacheco Gallegos, Hannia (?), Santiago (?), Meribeth (?)
+**Authors:** Karime Pacheco Gallegos, Hannia Ashley Alvarado Galván, Santiago Basaldua Ramírez, Meribeth Yamilet Perez Espinoza
 
 **Code and Data:** Accompanying repository `fpce`. Raw Alibaba traces are acquired from the public Beijing OSS mirror. Google Cluster Data 2019 is a one-cell, one-week export of lifecycle events. Coefficient sources are cited in `params/physical_cost.toml`. Processed tables and checksums are documented with the repository.
 
