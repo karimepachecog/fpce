@@ -7,7 +7,7 @@ Fault-triggered Physical Cost Estimator (FPCE) — predicting doomed batch insta
 | Role | Discipline | Owns | Key outputs |
 |------|------------|------|-------------|
 | **A — Data engineer** | Pipeline & data | Trace ingestion, instance labels, coefficient registry | `instance_events.parquet`, `time_grid.parquet`, `params/physical_cost.toml` |
-| **B — Data scientist** | ML | Features, classifier, reactive baseline, lead-time events | Model artifacts (`src/fpce/features/`, `src/fpce/model/`) |
+| **B — Data scientist** | ML | Features, classifier, reactive baseline, lead-time events | **Frozen.** HistGB t=0.9: `models/primary_hgb_frozen.joblib`, `reports/role_b_handoff.parquet`, [docs/role_b.md](docs/role_b.md) |
 | **C — Electrical engineer** | Physical cost | Fan et al. power model + PUE + WUE | kWh/liter **ranges** per doomed instance (`src/fpce/costing/`) |
 | **D — Software engineer** | Integration | Replay harness, experiment runner | End-to-end result (`src/fpce/replay/`) |
 
@@ -36,8 +36,8 @@ src/fpce/
   io.py                       # CSV/Parquet helpers
   ingest/                     # Role A pipeline
   costing/                    # Coefficient loader + Role C contract
-  features/                   # Role B contract (stub)
-  model/                      # Role B contract (stub)
+  features/                   # Role B feature join (assemble + windows)
+  model/                      # Role B classifier (HistGB frozen; XGB experiments)
   replay/                     # Role D contract
   provenance/                 # SPEC Power envelope scraper
 data/processed/               # Parquets + split JSON (parquets gitignored)
@@ -92,33 +92,34 @@ data/processed/replication_rack_machine_ids.json
 
 Skip `batch_instance.parquet`, `batch_task.parquet`, `machine_usage.parquet`, and `time_grid_chunks/` — Role B/C/D do not open them.
 
-## What Role B (data scientist) consumes
+## What Role B (data scientist) produced (frozen)
 
-- **Training:** `data/processed/primary/instance_events.parquet` + `primary_time_split.json`
-- **Host context:** `data/processed/primary/time_grid.parquet` via `fpce.features.windows.join_host_at_decision` (`time_stamp <= decision_time`)
-- **Contract:** `params/feature_contract.json` — call `fpce.contracts.assert_no_leakage`
-- **Replication eval:** `data/processed/replication/instance_events.parquet` (same window/hardware; replication, not distribution shift)
-- **Cross-provider eval:** `data/processed/google/attempts_sample.parquet` on a laptop; full `attempts.parquet` on 16+ GB RAM. `fpce-cross-provider` defaults to the sample if present. Use `plan_cpu_frac` / `plan_mem_frac`, never raw `plan_cpu` or `machine_id`.
-- **Column dictionary:** [docs/data_dictionary.md](docs/data_dictionary.md)
+Canonical document: [docs/role_b.md](docs/role_b.md).
 
-The machine-minute column `failure_within_horizon` is **not** the target (~37% positive). `failed` on instance events is.
+- **Official model:** HistGradientBoosting, threshold **0.9** — `models/primary_hgb_frozen.joblib`
+- **Handoff table (Roles C/D):** `reports/role_b_handoff.parquet` (one row per eligible frozen-test event)
+- **Do not train on** `failure_within_horizon`. Target is `failed` on `eligible_for_training=1`.
+- XGBoost v1/v2 reports exist under `reports/primary_xgb_*` but are **not** the official model.
+
+Inputs used: `data/processed/primary/instance_events.parquet`, `time_grid.parquet`, `primary_time_split.json`, `params/feature_contract.json`.
 
 ## What Role C (electrical engineer) consumes
 
-- Costing-eligible true positives from Role B (`eligible_for_costing=1`)
-- Host utilization during `[decision_time, event_end)`
-- **`params/physical_cost.toml`** via `fpce.costing.coefficients.load_physical_cost_params()`
-- Water = IT kWh × WUE. Facility energy = IT kWh × PUE. No cooling share.
+Role C has **not** started. Do not compute kWh or water liters yet.
+
+When it starts: `reports/role_b_handoff.parquet` filtered to `eligible_for_costing=1`, host utilization on `[decision_time, event_end)` from `time_grid.parquet`, and `params/physical_cost.toml`. Water = IT kWh × WUE. Facility energy = IT kWh × PUE. No cooling share. See [docs/role_b.md](docs/role_b.md).
 
 ## What Role D (software engineer) consumes
 
-- Trained classifier and reactive baseline from Role B
-- Cost translation API from Role C
+- Frozen classifier `models/primary_hgb_frozen.joblib` and reactive baseline from Role B
+- Per-event table `reports/role_b_handoff.parquet`
+- Cost translation API from Role C (not yet)
 - Instance events + time grid for simulated real-time replay (`fpce-replay`)
 
 ## Documentation
 
 - [docs/handover.md](docs/handover.md) — one-page Role A handover (script order, USB, what B/C/D do next)
+- [docs/role_b.md](docs/role_b.md) — **Role B freeze** (model, threshold, metrics, lead time, C/D handoff)
 - [docs/pipeline.md](docs/pipeline.md) — stage-by-stage ingestion
 - [docs/roles.md](docs/roles.md) — handoff contracts
 - [docs/data_dictionary.md](docs/data_dictionary.md) — instance events + time grid
@@ -147,3 +148,4 @@ After `pip install -e .`:
 | `fpce-supercloud` | Fit Fan form to Supercloud GPU power (shape check) |
 | `fpce-cross-provider` | Train on Alibaba, score on Google (ROC-AUC / PR-AUC / lift) |
 | `fpce-operator-scale` | Operator ESG PUE/WUE vs LBNL (multiplicative scale, not kWh) |
+| `fpce-role-b-freeze` | Persist frozen HistGB bundle + Role B handoff parquet |

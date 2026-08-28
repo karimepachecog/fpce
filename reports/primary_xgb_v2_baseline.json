@@ -1,0 +1,289 @@
+{
+  "winner": "B",
+  "val_timestamp": 417433,
+  "stalled_boosting": false,
+  "features": [
+    "task_type",
+    "total_seq_no",
+    "plan_cpu_frac",
+    "plan_mem_frac",
+    "seq_no",
+    "instance_num",
+    "active_instances",
+    "disk_io_percent",
+    "net_out",
+    "net_in",
+    "mem_util_percent",
+    "cpu_util_percent"
+  ],
+  "preprocessing": {
+    "feature_order": [
+      "task_type",
+      "total_seq_no",
+      "plan_cpu_frac",
+      "plan_mem_frac",
+      "seq_no",
+      "instance_num",
+      "active_instances",
+      "disk_io_percent",
+      "net_out",
+      "net_in",
+      "mem_util_percent",
+      "cpu_util_percent"
+    ],
+    "numeric_features": [
+      "total_seq_no",
+      "plan_cpu_frac",
+      "plan_mem_frac",
+      "seq_no",
+      "instance_num",
+      "active_instances",
+      "disk_io_percent",
+      "net_out",
+      "net_in",
+      "mem_util_percent",
+      "cpu_util_percent"
+    ],
+    "categorical_features": [
+      "task_type"
+    ],
+    "task_type_representation": "Ordinal codes from inner-train categories; unknown/NaN stay missing. Passed to XGBoost as pandas 'category' with enable_categorical=True (same codes HistGB uses via categorical_features=[0]). No numeric scaling.",
+    "numeric_imputer": {
+      "strategy": "median",
+      "statistics_from": "inner train only (validation and test unused)",
+      "medians": {
+        "total_seq_no": 1.0,
+        "plan_cpu_frac": 0.010416666666666666,
+        "plan_mem_frac": 0.3,
+        "seq_no": 1.0,
+        "instance_num": 3709.0,
+        "active_instances": 177.0,
+        "disk_io_percent": 8.0,
+        "net_out": 34.406666666666666,
+        "net_in": 42.27,
+        "mem_util_percent": 91.16666666666667,
+        "cpu_util_percent": 44.166666666666664
+      }
+    },
+    "task_type": {
+      "encoder": "sklearn.preprocessing.OrdinalEncoder",
+      "handle_unknown": "use_encoded_value",
+      "unknown_value": "NaN",
+      "encoded_missing_value": "NaN",
+      "train_categories": [
+        "1",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "n_train_categories": 11,
+      "note": "Unseen levels become NaN (missing). Encoder is fit on the training slice only \u2014 never on validation or test."
+    },
+    "scale_pos_weight": 445.24399759903963,
+    "n_inner_train": 7434425,
+    "n_inner_positive": 16660,
+    "n_inner_negative": 7417765,
+    "n_val": 1565780,
+    "n_test": 3974412
+  },
+  "winner_params": {
+    "objective": "binary:logistic",
+    "eval_metric": "aucpr",
+    "tree_method": "hist",
+    "enable_categorical": true,
+    "random_state": 0,
+    "n_jobs": -1,
+    "early_stopping_rounds": 50,
+    "learning_rate": 0.03,
+    "max_depth": 5,
+    "min_child_weight": 50,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 10.0,
+    "reg_alpha": 0.1,
+    "n_estimators": 500,
+    "scale_pos_weight": 445.24399759903963
+  },
+  "winner_best_iteration": 274,
+  "test_ranking": {
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.9793020783015514,
+    "pr_auc": 0.8398978862525036,
+    "average_precision": 0.8398978862525036
+  },
+  "test_threshold_0.5": {
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.9793020783015514,
+    "pr_auc": 0.8398978862525036,
+    "average_precision": 0.8398978862525036,
+    "threshold": 0.5,
+    "precision": 0.17987495324106237,
+    "recall": 0.8909475913181577,
+    "f1": 0.29931972789115646,
+    "accuracy": 0.9960348851603709,
+    "accuracy_not_useful": true,
+    "true_negatives": 3955287,
+    "false_positives": 15347,
+    "false_negatives": 412,
+    "true_positives": 3366,
+    "confusion_matrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          3955287,
+          15347
+        ],
+        [
+          412,
+          3366
+        ]
+      ]
+    },
+    "n_alerts": 18713,
+    "fp_per_tp": 4.55941770647653,
+    "alert_rate": 0.004708369439303223,
+    "alert_rate_pct": 0.47083694393032227
+  },
+  "test_operational": {
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.9793020783015514,
+    "pr_auc": 0.8398978862525036,
+    "average_precision": 0.8398978862525036,
+    "threshold": 0.35872969031333923,
+    "precision": 0.09552725534845802,
+    "recall": 0.8994176813128639,
+    "f1": 0.17271086939947647,
+    "accuracy": 0.9918093544403549,
+    "accuracy_not_useful": true,
+    "true_negatives": 3938461,
+    "false_positives": 32173,
+    "false_negatives": 380,
+    "true_positives": 3398,
+    "confusion_matrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          3938461,
+          32173
+        ],
+        [
+          380,
+          3398
+        ]
+      ]
+    },
+    "n_alerts": 35571,
+    "fp_per_tp": 9.468216597998822,
+    "alert_rate": 0.008950003170280283,
+    "alert_rate_pct": 0.8950003170280283
+  },
+  "references_test": {
+    "hist_gb_t0.9": {
+      "n": 3974412,
+      "n_positive": 3778,
+      "positive_rate": 0.0009505808657985131,
+      "roc_auc": 0.9844181661507554,
+      "pr_auc": 0.8018767510002215,
+      "average_precision": 0.8018767510002215,
+      "threshold": 0.9,
+      "precision": 0.1406858434869991,
+      "recall": 0.8893594494441504,
+      "f1": 0.24294132533169444,
+      "accuracy": 0.9947310444916129,
+      "accuracy_not_useful": true,
+      "true_negatives": 3950111,
+      "false_positives": 20523,
+      "false_negatives": 418,
+      "true_positives": 3360,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            3950111,
+            20523
+          ],
+          [
+            418,
+            3360
+          ]
+        ]
+      },
+      "n_alerts": 23883,
+      "fp_per_tp": 6.108035714285714,
+      "alert_rate": 0.006009190793506058,
+      "alert_rate_pct": 0.6009190793506058
+    },
+    "xgb_v1_operational": {
+      "n": 3974412,
+      "n_positive": 3778,
+      "positive_rate": 0.0009505808657985131,
+      "roc_auc": 0.9685136398363023,
+      "pr_auc": 0.8383993321789268,
+      "average_precision": 0.8383993321789268,
+      "threshold": 0.5096072554588318,
+      "precision": 0.2042584345067415,
+      "recall": 0.8861831656961355,
+      "f1": 0.3319946452476573,
+      "accuracy": 0.9966100645831384,
+      "accuracy_not_useful": true,
+      "true_negatives": 3957591,
+      "false_positives": 13043,
+      "false_negatives": 430,
+      "true_positives": 3348,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            3957591,
+            13043
+          ],
+          [
+            430,
+            3348
+          ]
+        ]
+      },
+      "n_alerts": 16391,
+      "fp_per_tp": 3.8957586618876943,
+      "alert_rate": 0.00412413207287015,
+      "alert_rate_pct": 0.412413207287015
+    }
+  },
+  "figures": {
+    "pr_curve": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_v2_pr_curve.png",
+    "threshold_vs_pr": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_v2_threshold_precision_recall.png",
+    "lead_time": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_v2_lead_time.png"
+  },
+  "scores_path": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_xgb_v2_test_scores.npz",
+  "v1_files_untouched": [
+    "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_xgb_baseline.json",
+    "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_xgb_thresholds.json",
+    "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_xgb_lead_time.json",
+    "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_xgb_test_scores.npz"
+  ]
+}

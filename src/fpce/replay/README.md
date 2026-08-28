@@ -11,8 +11,8 @@ Proposal Methodology §4: a replay harness executes the trained classifier again
 | Source | Deliverable |
 |--------|-------------|
 | Role A | `instance_events.parquet` + `time_grid.parquet` |
-| Role B | Trained classifier + reactive baseline |
-| Role C | `translate()` API returning kWh/liter ranges per doomed instance |
+| Role B | Frozen HistGB: `models/primary_hgb_frozen.joblib` (threshold 0.9). Per-event table: `reports/role_b_handoff.parquet`. Reactive rule: `fpce.model.baseline`. Summary: `docs/role_b.md` |
+| Role C | `translate()` API returning kWh/liter ranges per doomed instance (**not implemented yet**) |
 
 ## Current stub
 

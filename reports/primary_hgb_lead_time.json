@@ -1,0 +1,106 @@
+{
+  "threshold": 0.9,
+  "split_timestamp": 518355,
+  "scores_path": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_hgb_test_scores.npz",
+  "definitions": {
+    "failure": "test row with failed=1 (Failed/Interrupted), eligible_for_training=1",
+    "failure_time": "event_end (recorded end_time, else start_time if end_time=0)",
+    "model_alert_time": "decision_time if proba >= threshold, else no alert",
+    "lead_time": "failure_time - alert_time, only if alert_time < failure_time",
+    "reactive": "min(retry at decision_time if seq_no>=2, decision_time + train median succeeded duration by task_type)",
+    "delta": "lead_time_model - lead_time_baseline on failures both detect before event_end"
+  },
+  "n_test": 3974412,
+  "reactive_runtime_medians_seconds": {
+    "global": 10.0,
+    "by_task_type": {
+      "1": 10.0,
+      "3": 34.0,
+      "4": 199.0,
+      "5": 52.0,
+      "6": 41.0,
+      "7": 20166.0,
+      "8": 31.0,
+      "9": 94.0,
+      "10": 328.0,
+      "11": 146.0,
+      "12": 22.0
+    }
+  },
+  "model": {
+    "name": "hist_gb",
+    "n_failures": 3778,
+    "n_detected_before_event": 1210,
+    "n_not_detected": 2568,
+    "pct_detected": 32.02752779248279,
+    "lead_time_seconds": {
+      "n": 1210,
+      "min": 1.0,
+      "max": 2184.0,
+      "mean": 82.95867768595042,
+      "median": 17.0,
+      "p10": 2.0,
+      "p25": 8.0,
+      "p50": 17.0,
+      "p75": 24.0,
+      "p90": 378.0,
+      "p95": 395.0
+    },
+    "lead_time_bins": {
+      "lt_1_min": 1013,
+      "min_1_to_5": 22,
+      "min_5_to_15": 167,
+      "min_15_to_30": 6,
+      "gt_30_min": 2,
+      "n": 1210
+    }
+  },
+  "baseline": {
+    "name": "reactive",
+    "n_failures": 3778,
+    "n_detected_before_event": 807,
+    "n_not_detected": 2971,
+    "pct_detected": 21.360508205399682,
+    "lead_time_seconds": {
+      "n": 807,
+      "min": 1.0,
+      "max": 2038.0,
+      "mean": 119.06319702602231,
+      "median": 19.0,
+      "p10": 14.0,
+      "p25": 17.0,
+      "p50": 19.0,
+      "p75": 56.0,
+      "p90": 382.0,
+      "p95": 439.59999999999945
+    },
+    "lead_time_bins": {
+      "lt_1_min": 606,
+      "min_1_to_5": 31,
+      "min_5_to_15": 162,
+      "min_15_to_30": 6,
+      "gt_30_min": 2,
+      "n": 807
+    }
+  },
+  "paired": {
+    "n_both_detected": 794,
+    "n_model_only": 416,
+    "n_baseline_only": 13,
+    "delta_seconds": {
+      "n": 794,
+      "min": 0.0,
+      "max": 146.0,
+      "mean": 3.5151133501259446,
+      "median": 0.0,
+      "p10": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 10.0,
+      "p90": 10.0,
+      "p95": 10.0
+    }
+  },
+  "n_failures_zero_or_missing_window": 2502,
+  "figure": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_hgb_lead_time.png"
+}

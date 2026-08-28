@@ -1,0 +1,199 @@
+{
+  "val_timestamp": 417433,
+  "split_timestamp": 518355,
+  "early_stopping_rounds": 50,
+  "scale_pos_weight": 445.24399759903963,
+  "stalled_all_best_iteration_near_zero": false,
+  "configs": [
+    {
+      "name": "A",
+      "params": {
+        "objective": "binary:logistic",
+        "eval_metric": "aucpr",
+        "tree_method": "hist",
+        "enable_categorical": true,
+        "random_state": 0,
+        "n_jobs": -1,
+        "early_stopping_rounds": 50,
+        "learning_rate": 0.02,
+        "max_depth": 4,
+        "min_child_weight": 50,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 5.0,
+        "reg_alpha": 0.0,
+        "n_estimators": 500,
+        "scale_pos_weight": 445.24399759903963
+      },
+      "best_iteration": 78,
+      "num_boosted_rounds": 129,
+      "best_score": 0.7727155937981774,
+      "validation": {
+        "pr_auc": 0.774382816929974,
+        "roc_auc": 0.9417144440373438,
+        "threshold_0.5": {
+          "threshold": 0.5,
+          "precision": 0.21077594384367293,
+          "recall": 0.8278688524590164,
+          "f1": 0.3360048389535763,
+          "accuracy": 0.9971956468980316,
+          "accuracy_not_useful": true,
+          "true_negatives": 1560278,
+          "false_positives": 4160,
+          "false_negatives": 231,
+          "true_positives": 1111,
+          "confusion_matrix": {
+            "labels": [
+              0,
+              1
+            ],
+            "matrix": [
+              [
+                1560278,
+                4160
+              ],
+              [
+                231,
+                1111
+              ]
+            ]
+          },
+          "n_alerts": 5271,
+          "fp_per_tp": 3.7443744374437444,
+          "alert_rate": 0.0033663733091494337,
+          "alert_rate_pct": 0.33663733091494336
+        }
+      }
+    },
+    {
+      "name": "B",
+      "params": {
+        "objective": "binary:logistic",
+        "eval_metric": "aucpr",
+        "tree_method": "hist",
+        "enable_categorical": true,
+        "random_state": 0,
+        "n_jobs": -1,
+        "early_stopping_rounds": 50,
+        "learning_rate": 0.03,
+        "max_depth": 5,
+        "min_child_weight": 50,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 10.0,
+        "reg_alpha": 0.1,
+        "n_estimators": 500,
+        "scale_pos_weight": 445.24399759903963
+      },
+      "best_iteration": 274,
+      "num_boosted_rounds": 325,
+      "best_score": 0.8305367163222515,
+      "validation": {
+        "pr_auc": 0.8305388782453367,
+        "roc_auc": 0.9745667106037929,
+        "threshold_0.5": {
+          "threshold": 0.5,
+          "precision": 0.19536191145467321,
+          "recall": 0.8286140089418778,
+          "f1": 0.3161785612738129,
+          "accuracy": 0.9969280486402943,
+          "accuracy_not_useful": true,
+          "true_negatives": 1559858,
+          "false_positives": 4580,
+          "false_negatives": 230,
+          "true_positives": 1112,
+          "confusion_matrix": {
+            "labels": [
+              0,
+              1
+            ],
+            "matrix": [
+              [
+                1559858,
+                4580
+              ],
+              [
+                230,
+                1112
+              ]
+            ]
+          },
+          "n_alerts": 5692,
+          "fp_per_tp": 4.118705035971223,
+          "alert_rate": 0.0036352488855394757,
+          "alert_rate_pct": 0.3635248885539476
+        }
+      }
+    },
+    {
+      "name": "C",
+      "params": {
+        "objective": "binary:logistic",
+        "eval_metric": "aucpr",
+        "tree_method": "hist",
+        "enable_categorical": true,
+        "random_state": 0,
+        "n_jobs": -1,
+        "early_stopping_rounds": 50,
+        "learning_rate": 0.05,
+        "max_depth": 4,
+        "min_child_weight": 100,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "reg_lambda": 10.0,
+        "reg_alpha": 0.1,
+        "n_estimators": 300,
+        "scale_pos_weight": 445.24399759903963
+      },
+      "best_iteration": 76,
+      "num_boosted_rounds": 127,
+      "best_score": 0.7697776412952005,
+      "validation": {
+        "pr_auc": 0.7711757018545404,
+        "roc_auc": 0.9604392652879147,
+        "threshold_0.5": {
+          "threshold": 0.5,
+          "precision": 0.1986423722758128,
+          "recall": 0.8286140089418778,
+          "f1": 0.32046109510086457,
+          "accuracy": 0.9969880826169705,
+          "accuracy_not_useful": true,
+          "true_negatives": 1559952,
+          "false_positives": 4486,
+          "false_negatives": 230,
+          "true_positives": 1112,
+          "confusion_matrix": {
+            "labels": [
+              0,
+              1
+            ],
+            "matrix": [
+              [
+                1559952,
+                4486
+              ],
+              [
+                230,
+                1112
+              ]
+            ]
+          },
+          "n_alerts": 5598,
+          "fp_per_tp": 4.034172661870503,
+          "alert_rate": 0.003575214908863314,
+          "alert_rate_pct": 0.3575214908863314
+        }
+      }
+    }
+  ],
+  "selection": {
+    "winner": "B",
+    "reason": "Highest validation PR-AUC, then lowest FP at threshold 0.5, then highest recall at 0.5. Test unused.",
+    "ranking": [
+      "B",
+      "A",
+      "C"
+    ]
+  },
+  "fourth_config": "Not run: A/B/C already test whether slower/regularized boosting uses more trees. Adding a fourth config would be extra tuning."
+}

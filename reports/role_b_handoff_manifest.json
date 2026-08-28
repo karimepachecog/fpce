@@ -1,0 +1,85 @@
+{
+  "official_model": "HistGradientBoostingClassifier",
+  "official_threshold": 0.9,
+  "xgboost_status": "Documented experiments only; not the official Role B model.",
+  "handoff": {
+    "path": "reports/role_b_handoff.parquet",
+    "sha256": "c05c932cb95d47e775f12b0511924271bde5fbe6c5bfddd4a242f46032bade8a",
+    "bytes": 167750222,
+    "n_rows": 3974412,
+    "n_failures": 3778,
+    "n_failures_with_positive_measurable_window": 1276,
+    "n_failures_without_measurable_lead_time": 2502,
+    "model_threshold": 0.9,
+    "n_model_alerts": 23883,
+    "n_failures_anticipated_by_model": 1210,
+    "pct_of_windowed_failures_anticipated": 94.82758620689656,
+    "n_failures_anticipated_by_reactive_baseline": 807,
+    "n_eligible_for_costing": 204,
+    "n_costing_eligible_failures": 204,
+    "join_keys_to_instance_events": [
+      "instance_name",
+      "machine_id",
+      "start_time",
+      "seq_no",
+      "decision_time",
+      "test_row_index"
+    ],
+    "note": "Lead-time fields are null unless alert_time < event_end. event_end <= decision_time yields no measurable lead. Role C must not compute kWh/liters from this file yet; filter eligible_for_costing=1 (and typically failed=1). XGBoost is not the official Role B model."
+  },
+  "model": {
+    "bundle_path": "models/primary_hgb_frozen.joblib",
+    "sklearn_version": "1.4.2",
+    "n_train": 9000205,
+    "n_test": 3974412,
+    "feature_order": [
+      "task_type",
+      "plan_cpu_frac",
+      "instance_num",
+      "seq_no",
+      "plan_mem_frac",
+      "total_seq_no",
+      "active_instances",
+      "mem_util_percent",
+      "net_in",
+      "disk_io_percent",
+      "cpu_util_percent",
+      "net_out"
+    ],
+    "threshold": 0.9,
+    "hgb_params": {
+      "max_depth": 6,
+      "learning_rate": 0.1,
+      "max_iter": 100,
+      "min_samples_leaf": 20,
+      "l2_regularization": 0.0,
+      "random_state": 0,
+      "early_stopping": false,
+      "class_weight": "balanced",
+      "categorical_features": [
+        0
+      ],
+      "sklearn_estimator": "HistGradientBoostingClassifier",
+      "imbalance": {
+        "method": "class_weight='balanced'",
+        "sample_weight": null
+      }
+    },
+    "score_check": {
+      "max_abs_diff_vs_npz": 2.9801413004015842e-08,
+      "tolerance": 1e-05,
+      "n_test": 3974412
+    },
+    "hgb_params_frozen": {
+      "max_depth": 6,
+      "learning_rate": 0.1,
+      "max_iter": 100,
+      "min_samples_leaf": 20,
+      "l2_regularization": 0.0,
+      "random_state": 0,
+      "early_stopping": false
+    },
+    "sha256": "383ea64215636a56d7cedf76bffb84d5e9c7a90783652cc59767417f588b6a7f",
+    "bytes": 137722
+  }
+}
