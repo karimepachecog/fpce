@@ -22,7 +22,7 @@ Clone the GitHub repo, overlay the USB onto `data/processed/`, then `pip install
 | 14 | `fpce-operator-scale` | `reports/operator_coefficient_scale.json` (PUE/WUE scale vs LBNL; **not** kWh) |
 | 15 | `fpce-cross-provider` | `reports/cross_provider.json` (adapter smoke-test on the Google sample) |
 
-B/C/D do **not** re-run 1–13 unless reproducing ingest. After clone + USB they only need `pip install -e ".[dev]"`, then Role B starts from `instance_events.parquet` + `join_host_at_decision`.
+B/C/D do **not** re-run 1–13 unless reproducing ingest. After clone + USB they only need `pip install -e ".[dev]"`. **Role B is frozen** — see [role_b.md](role_b.md). Official model: `models/primary_hgb_frozen.joblib` (HistGB, threshold 0.9). Handoff: `reports/role_b_handoff.parquet`. Do not start Role C costing until that role is opened.
 
 ## Contracts
 
@@ -32,10 +32,10 @@ B/C/D do **not** re-run 1–13 unless reproducing ingest. After clone + USB they
 - Costing: `eligible_for_costing=1` only. Grid `cpu_util_percent` is 0–100; Fan wants utilization in [0, 1].
 - Default PUE/WUE: LBNL ranges in `params/physical_cost.toml`. Operator ESG points are a **scale** comparison, not a Fan run.
 
-## After B freezes primary evaluation (not A)
+## After this Role B freeze (not A)
 
-- C: cost the replication rack (5,123 costing-eligible failures) and, optionally, Google's 1.18M costable attempts (scale by machine fraction).
-- B+C+D: scheduler policy simulation (kill if P(fail) > threshold vs reactive baseline).
+- C: consume `reports/role_b_handoff.parquet` (`eligible_for_costing=1`); later, cost the replication rack (5,123 costing-eligible failures) and, optionally, Google's 1.18M costable attempts (scale by machine fraction). **No kWh/liters in Role B.**
+- B+C+D: scheduler policy simulation (kill if P(fail) > 0.9 vs reactive baseline).
 - AI-compute governance on Supercloud stays Future Work.
 
 Full CLI list: [README.md](../README.md). Role contracts: [roles.md](roles.md). USB file list: [HANDOFF.md](../data/processed/HANDOFF.md).

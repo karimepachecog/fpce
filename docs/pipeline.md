@@ -16,7 +16,7 @@ flowchart TD
   ie --> fs[fpce-freeze-split]
   tg --> fs
   spec[fpce-specpower] --> params[params/physical_cost.toml]
-  ie --> roleB[Role B classifier]
+  ie --> roleB[Role B classifier — frozen HistGB t=0.9]
   params --> roleC[Role C costing]
   sc[fpce-supercloud] -.->|form check only| params
   gq[Google parquet shards] --> ge[fpce-google-events]

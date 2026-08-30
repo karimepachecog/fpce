@@ -25,5 +25,15 @@ data/processed/**/time_grid_chunks/
 !reports/data_quality.json
 !reports/google_quality.json
 
+# Cached test scores for threshold analysis (regenerable)
+reports/*.npz
+
+# Full-test Role B handoff table (~all eligible test rows; regenerable)
+reports/role_b_handoff.parquet
+
+# Frozen model binaries (share separately; regenerable via fpce-role-b-freeze)
+*.joblib
+
 # Literature PDFs (local reading copies; not required to run the pipeline)
 state-of-the-art/*.pdf
+.DS_Store

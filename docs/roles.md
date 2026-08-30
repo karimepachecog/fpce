@@ -21,13 +21,17 @@
 
 ## Role B → Role C (electrical engineer)
 
-| Deliverable | Format | Notes |
-|-------------|--------|-------|
-| True-positive doomed instances | JSON/Parquet | `instance_name`, `machine_id`, `decision_time`, `event_end`, `waste_window_seconds` |
-| Utilization during waste window | From time_grid | Host CPU during `[decision_time, event_end)` for costing-eligible TPs |
-| Reactive baseline fire time | per TP | For lead-time vs a retry-count / runtime-threshold rule |
+Role B is **frozen**. Full contract: [role_b.md](role_b.md). **Do not compute kWh or liters until Role C starts.**
 
-Costing uses only rows with `eligible_for_costing=1` (failed, **measured** waste window ≥ 60 s, not imputed). `waste_window_upper_bound_seconds` is a parent-task bound for rows with `end_time=0`; it is never mixed into the measured window.
+| Deliverable | Path | Notes |
+|-------------|------|-------|
+| Per test-event scores and alerts | `reports/role_b_handoff.parquet` | One row per eligible frozen-test instance. Manifest: `reports/role_b_handoff_manifest.json` |
+| Official classifier | `models/primary_hgb_frozen.joblib` | HistGB, threshold 0.9 |
+| Lead-time summary | `reports/primary_hgb_lead_time.json` | 1,210 anticipated; median 17 s |
+
+Filter `eligible_for_costing=1` (failed, **measured** waste window ≥ 60 s, not imputed). Join host CPU from `data/processed/primary/time_grid.parquet` on `[decision_time, event_end)`. Map back to `instance_events.parquet` with `instance_name`, `machine_id`, `start_time`, `seq_no`, `decision_time`, `test_row_index`.
+
+`waste_window_upper_bound_seconds` is a parent-task bound for rows with `end_time=0`; it is never mixed into the measured window.
 
 The replication rack (5,123 costing-eligible failures) may be used as an **additional costing pool only after** primary-rack evaluation is frozen. It is not extra training data.
 
@@ -44,9 +48,10 @@ The replication rack (5,123 costing-eligible failures) may be used as an **addit
 
 | Deliverable | Source | Notes |
 |-------------|--------|-------|
-| Trained classifier | Role B | Inference at instance `decision_time` |
-| Threshold baseline | Role B | Reactive comparison per event |
-| Cost translation | Role C | kWh/liter range per waste window |
+| Trained classifier | `models/primary_hgb_frozen.joblib` | Score at `decision_time`; threshold 0.9. See `fpce.model.freeze.predict_proba_with_bundle` |
+| Frozen-test scores | `reports/role_b_handoff.parquet` | Includes `model_alert`, reactive times, lead times |
+| Reactive baseline | `src/fpce/model/baseline.py` | Train medians in `reports/primary_hgb_lead_time.json` |
+| Cost translation | Role C | Not implemented yet (kWh/liter ranges) |
 | Time grid + instance events | Role A | Replay source |
 
 **Role D owns:** wiring B and C together in the replay harness, logging lead times, and reporting accumulated physical-cost ranges across true-positive doomed instances (proposal Methodology §4).

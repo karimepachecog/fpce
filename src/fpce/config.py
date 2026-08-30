@@ -14,6 +14,7 @@ DATA_RAW = PROJECT_ROOT / "data" / "raw"
 DATA_INTERIM = PROJECT_ROOT / "data" / "interim"
 DATA_PROCESSED = PROJECT_ROOT / "data" / "processed"
 REPORTS_DIR = PROJECT_ROOT / "reports"
+MODELS_DIR = PROJECT_ROOT / "models"
 RACK_IDS_PATH = DATA_PROCESSED / "rack_machine_ids.json"
 REPLICATION_RACK_IDS_PATH = DATA_PROCESSED / "replication_rack_machine_ids.json"
 

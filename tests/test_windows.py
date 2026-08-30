@@ -46,6 +46,27 @@ def test_join_rejects_future_grid_rows() -> None:
     assert pd.isna(out.loc[0, "time_stamp"]) or out.loc[0, "time_stamp"] <= 100
 
 
+def test_join_overlapping_times_across_machines() -> None:
+    """Regression: as-of join must not require sorting by machine_id first."""
+    events = pd.DataFrame(
+        {
+            "instance_name": ["a", "b"],
+            "machine_id": ["m2", "m1"],
+            "decision_time": [100, 50],
+        }
+    )
+    grid = pd.DataFrame(
+        {
+            "machine_id": ["m1", "m2", "m1", "m2"],
+            "time_stamp": [0, 0, 80, 90],
+            "cpu_util_percent": [1.0, 2.0, 3.0, 4.0],
+        }
+    )
+    out = join_host_at_decision(events, grid, columns=["cpu_util_percent"])
+    assert float(out.loc[out["instance_name"] == "b", "cpu_util_percent"].iloc[0]) == 1.0
+    assert float(out.loc[out["instance_name"] == "a", "cpu_util_percent"].iloc[0]) == 4.0
+
+
 def test_join_does_not_cross_machines() -> None:
     events = pd.DataFrame(
         {"instance_name": ["a"], "machine_id": ["m1"], "decision_time": [300]}

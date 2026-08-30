@@ -37,8 +37,12 @@ def join_host_at_decision(
     left = events.copy()
     left["decision_time"] = pd.to_numeric(left["decision_time"], errors="coerce")
     left["_row_id"] = range(len(left))
-    left = left.sort_values(["machine_id", "decision_time", "_row_id"])
-    right = right.sort_values(["machine_id", "time_stamp"])
+    # pandas merge_asof checks that the *on* keys are globally monotonic.
+    # Sorting by machine_id first restarts timestamps each host and raises
+    # "keys must be sorted" on a multi-machine rack. Within each machine_id,
+    # a global time sort is still nondecreasing.
+    left = left.sort_values(["decision_time", "machine_id", "_row_id"], kind="mergesort")
+    right = right.sort_values(["time_stamp", "machine_id"], kind="mergesort")
 
     joined = pd.merge_asof(
         left,

@@ -1,0 +1,124 @@
+{
+  "xgb_threshold": 0.5096072554588318,
+  "hgb_threshold": 0.9,
+  "split_timestamp": 518355,
+  "definitions": {
+    "alert_time": "decision_time if score >= threshold",
+    "failure_time": "event_end",
+    "lead_time": "event_end - alert_time only if alert_time < event_end"
+  },
+  "xgboost": {
+    "name": "xgboost",
+    "n_failures": 3778,
+    "n_detected_before_event": 1199,
+    "n_not_detected": 2579,
+    "pct_detected": 31.73636844891477,
+    "lead_time_seconds": {
+      "n": 1199,
+      "min": 1.0,
+      "max": 2184.0,
+      "mean": 83.65387823185988,
+      "median": 17.0,
+      "p10": 2.0,
+      "p25": 8.0,
+      "p50": 17.0,
+      "p75": 24.0,
+      "p90": 378.0,
+      "p95": 395.1
+    },
+    "lead_time_bins": {
+      "lt_1_min": 1002,
+      "min_1_to_5": 22,
+      "min_5_to_15": 167,
+      "min_15_to_30": 6,
+      "gt_30_min": 2,
+      "n": 1199
+    },
+    "n_positive_window": 1276,
+    "pct_anticipated_all_failures": 31.73636844891477,
+    "pct_anticipated_given_window": 93.96551724137932
+  },
+  "hist_gb": {
+    "name": "hist_gb",
+    "n_failures": 3778,
+    "n_detected_before_event": 1210,
+    "n_not_detected": 2568,
+    "pct_detected": 32.02752779248279,
+    "lead_time_seconds": {
+      "n": 1210,
+      "min": 1.0,
+      "max": 2184.0,
+      "mean": 82.95867768595042,
+      "median": 17.0,
+      "p10": 2.0,
+      "p25": 8.0,
+      "p50": 17.0,
+      "p75": 24.0,
+      "p90": 378.0,
+      "p95": 395.0
+    },
+    "lead_time_bins": {
+      "lt_1_min": 1013,
+      "min_1_to_5": 22,
+      "min_5_to_15": 167,
+      "min_15_to_30": 6,
+      "gt_30_min": 2,
+      "n": 1210
+    },
+    "n_positive_window": 1276,
+    "pct_anticipated_all_failures": 32.02752779248279,
+    "pct_anticipated_given_window": 94.82758620689656
+  },
+  "reactive": {
+    "name": "reactive",
+    "n_failures": 3778,
+    "n_detected_before_event": 807,
+    "n_not_detected": 2971,
+    "pct_detected": 21.360508205399682,
+    "lead_time_seconds": {
+      "n": 807,
+      "min": 1.0,
+      "max": 2038.0,
+      "mean": 119.06319702602231,
+      "median": 19.0,
+      "p10": 14.0,
+      "p25": 17.0,
+      "p50": 19.0,
+      "p75": 56.0,
+      "p90": 382.0,
+      "p95": 439.59999999999945
+    },
+    "lead_time_bins": {
+      "lt_1_min": 606,
+      "min_1_to_5": 31,
+      "min_5_to_15": 162,
+      "min_15_to_30": 6,
+      "gt_30_min": 2,
+      "n": 807
+    },
+    "n_positive_window": 1276,
+    "pct_anticipated_all_failures": 21.360508205399682,
+    "pct_anticipated_given_window": 63.244514106583075
+  },
+  "overlap": {
+    "n_xgb_and_hgb": 1188,
+    "n_xgb_not_hgb": 11,
+    "n_hgb_not_xgb": 22,
+    "n_xgb_not_reactive": 405,
+    "n_hgb_not_reactive": 416,
+    "delta_xgb_minus_hgb_seconds": {
+      "n": 1188,
+      "min": 0.0,
+      "max": 0.0,
+      "mean": 0.0,
+      "median": 0.0,
+      "p10": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 0.0,
+      "p90": 0.0,
+      "p95": 0.0
+    }
+  },
+  "figure": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_lead_time.png"
+}

@@ -8,7 +8,7 @@
 |--------|----------|
 | Role A | `params/physical_cost.toml` |
 | Role A | `fpce.costing.coefficients.load_physical_cost_params()` |
-| Role B (data scientist) | Costing-eligible true positives: `decision_time`, `event_end`, host utilization during the waste window |
+| Role B (frozen) | `reports/role_b_handoff.parquet` — filter `eligible_for_costing=1`. Columns include `decision_time`, `event_end`, `model_alert_time`, `baseline_alert_time`. Do not compute kWh/liters here. |
 
 ## Coefficient registry (Role A deliverable)
 

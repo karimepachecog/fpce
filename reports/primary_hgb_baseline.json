@@ -1,0 +1,249 @@
+{
+  "split_timestamp": 518355,
+  "split_column": "start_time",
+  "target": "failed",
+  "n_train": 9000205,
+  "n_test": 3974412,
+  "features": [
+    "task_type",
+    "plan_cpu_frac",
+    "instance_num",
+    "plan_mem_frac",
+    "total_seq_no",
+    "seq_no",
+    "mem_util_percent",
+    "disk_io_percent",
+    "active_instances",
+    "net_out",
+    "cpu_util_percent",
+    "net_in"
+  ],
+  "preprocessing": {
+    "feature_order": [
+      "task_type",
+      "plan_cpu_frac",
+      "instance_num",
+      "plan_mem_frac",
+      "total_seq_no",
+      "seq_no",
+      "mem_util_percent",
+      "disk_io_percent",
+      "active_instances",
+      "net_out",
+      "cpu_util_percent",
+      "net_in"
+    ],
+    "numeric_features": [
+      "plan_cpu_frac",
+      "instance_num",
+      "plan_mem_frac",
+      "total_seq_no",
+      "seq_no",
+      "mem_util_percent",
+      "disk_io_percent",
+      "active_instances",
+      "net_out",
+      "cpu_util_percent",
+      "net_in"
+    ],
+    "categorical_features": [
+      "task_type"
+    ],
+    "numeric_imputer": {
+      "strategy": "median",
+      "statistics_from": "X_train only",
+      "medians": {
+        "plan_cpu_frac": 0.010416666666666666,
+        "instance_num": 3459.0,
+        "plan_mem_frac": 0.3,
+        "total_seq_no": 1.0,
+        "seq_no": 1.0,
+        "mem_util_percent": 91.33333333333333,
+        "disk_io_percent": 8.0,
+        "active_instances": 206.0,
+        "net_out": 35.01,
+        "cpu_util_percent": 43.5,
+        "net_in": 43.04999999999999
+      }
+    },
+    "task_type": {
+      "encoder": "sklearn.preprocessing.OrdinalEncoder",
+      "handle_unknown": "use_encoded_value",
+      "unknown_value": "NaN",
+      "encoded_missing_value": "NaN",
+      "train_categories": [
+        "1",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "n_train_categories": 11,
+      "note": "Unseen test levels (e.g. task_type=2) become NaN; HistGradientBoosting treats NaN as a missing category. Categories are fit on train only."
+    },
+    "dropped": [
+      "machine_id",
+      "mem_gps",
+      "mkpi",
+      "plan_cpu",
+      "plan_mem"
+    ]
+  },
+  "hist_gb_params": {
+    "max_depth": 6,
+    "learning_rate": 0.1,
+    "max_iter": 100,
+    "min_samples_leaf": 20,
+    "l2_regularization": 0.0,
+    "random_state": 0,
+    "early_stopping": false,
+    "class_weight": "balanced",
+    "categorical_features": [
+      0
+    ],
+    "sklearn_estimator": "HistGradientBoostingClassifier",
+    "imbalance": {
+      "method": "class_weight='balanced'",
+      "sample_weight": null
+    }
+  },
+  "train_chosen_threshold": {
+    "threshold": 0.3520973508936747,
+    "train_f1": 0.3196333503078561,
+    "n_candidates": 99,
+    "rule": "max F1 on train scores; test labels unused"
+  },
+  "always_predict_0": {
+    "name": "always_predict_0",
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.5,
+    "pr_auc": 0.0009505808657985131,
+    "average_precision": 0.0009505808657985131,
+    "threshold": 0.5,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "accuracy": 0.9990494191342015,
+    "accuracy_not_useful": true,
+    "true_negatives": 3970634,
+    "false_positives": 0,
+    "false_negatives": 3778,
+    "true_positives": 0,
+    "confusion_matrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          3970634,
+          0
+        ],
+        [
+          3778,
+          0
+        ]
+      ]
+    }
+  },
+  "hist_gb": {
+    "threshold_0.5": {
+      "name": "hist_gb_threshold_0.5",
+      "n": 3974412,
+      "n_positive": 3778,
+      "positive_rate": 0.0009505808657985131,
+      "roc_auc": 0.9844181667507133,
+      "pr_auc": 0.8018765139366266,
+      "average_precision": 0.8018765139366266,
+      "threshold": 0.5,
+      "precision": 0.08917680931815207,
+      "recall": 0.9017998941238751,
+      "f1": 0.1623037896291356,
+      "accuracy": 0.9911511438673193,
+      "accuracy_not_useful": true,
+      "true_negatives": 3935836,
+      "false_positives": 34798,
+      "false_negatives": 371,
+      "true_positives": 3407,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            3935836,
+            34798
+          ],
+          [
+            371,
+            3407
+          ]
+        ]
+      }
+    },
+    "threshold_train_f1": {
+      "name": "hist_gb_threshold_train_f1",
+      "n": 3974412,
+      "n_positive": 3778,
+      "positive_rate": 0.0009505808657985131,
+      "roc_auc": 0.9844181667507133,
+      "pr_auc": 0.8018765139366266,
+      "average_precision": 0.8018765139366266,
+      "threshold": 0.3520973508936747,
+      "precision": 0.057458563535911604,
+      "recall": 0.9084171519322393,
+      "f1": 0.108080871701203,
+      "accuracy": 0.9857478288612253,
+      "accuracy_not_useful": true,
+      "true_negatives": 3914336,
+      "false_positives": 56298,
+      "false_negatives": 346,
+      "true_positives": 3432,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            3914336,
+            56298
+          ],
+          [
+            346,
+            3432
+          ]
+        ]
+      }
+    }
+  },
+  "improvement_vs_always_0": {
+    "threshold_0.5": {
+      "delta_true_positives": 3407,
+      "delta_false_positives": 34798,
+      "delta_f1": 0.1623037896291356,
+      "delta_recall": 0.9017998941238751,
+      "delta_precision": 0.08917680931815207,
+      "pr_auc_vs_prevalence": 0.8009259330708282,
+      "note": "Always-0 has F1=0 and recall=0. PR-AUC of a constant-0 score equals test prevalence; ROC-AUC is 0.5. Ranking metrics do not use a threshold."
+    },
+    "threshold_train_f1": {
+      "delta_true_positives": 3432,
+      "delta_false_positives": 56298,
+      "delta_f1": 0.108080871701203,
+      "delta_recall": 0.9084171519322393,
+      "delta_precision": 0.057458563535911604,
+      "pr_auc_vs_prevalence": 0.8009259330708282,
+      "note": "Always-0 has F1=0 and recall=0. PR-AUC of a constant-0 score equals test prevalence; ROC-AUC is 0.5. Ranking metrics do not use a threshold."
+    }
+  }
+}

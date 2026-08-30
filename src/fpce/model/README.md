@@ -1,35 +1,40 @@
-# Role B — Model training & evaluation (contract)
+# Role B — Model training & evaluation
 
-**Owner:** Data scientist (Role B). This directory is a contract stub.
+**Owner:** Data scientist (Role B). **Frozen:** HistGradientBoosting, threshold 0.9.
 
-See also [../features/README.md](../features/README.md) for input artifacts.
+Canonical write-up: [docs/role_b.md](../../../docs/role_b.md).
 
-## Model choice (per proposal)
+## Official outputs
 
-Gradient-boosted classifier on admission-time instance features plus a short host utilization window ending at `decision_time`. Output: `P(instance will fail)`.
+| Artifact | Path |
+|----------|------|
+| Serialized model + train-only imputer/encoder | `models/primary_hgb_frozen.joblib` |
+| Frozen-test scores and alerts | `reports/role_b_handoff.parquet` |
+| Handoff manifest | `reports/role_b_handoff_manifest.json` |
+| Classification | `reports/primary_hgb_baseline.json`, `reports/primary_hgb_thresholds.json` |
+| Lead time vs reactive baseline | `reports/primary_hgb_lead_time.json` |
+
+XGBoost reports (`reports/primary_xgb_*`, `reports/primary_xgb_v2_*`) are experiments only.
+
+## Load the frozen scorer
+
+```python
+import joblib
+from fpce.model.freeze import predict_proba_with_bundle
+
+bundle = joblib.load("models/primary_hgb_frozen.joblib")
+# features: DataFrame with bundle["feature_order"] columns
+proba = predict_proba_with_bundle(bundle, features)
+alert = proba >= bundle["threshold"]  # 0.9
+```
 
 ## Evaluation metrics (required)
 
-- Precision, recall, and F1 on primary-rack **time-based test split**, on `eligible_for_training` rows only
-- Always-predict-0 and always-predict-1 as dumb baselines (positive rate is ~0.17%, so always-1 is no longer a strong baseline)
-- Lead-time distribution: `baseline_fire_time - decision_time` for true positives that are `eligible_for_costing`
-- Single replication pass on the failure-domain-52 rack (report regardless of outcome; same window and hardware — replication, not distribution shift)
-- Optional cross-provider pass: `fpce-cross-provider` after `fpce-google-events` ([docs/google_export.md](../../../docs/google_export.md)). Use `plan_cpu_frac` / `plan_mem_frac`; report ROC-AUC / PR-AUC / lift, not F1 at 0.5, as the headline shift metric.
+- Precision, recall, and F1 on the primary-rack **time-based test split**, on `eligible_for_training` rows only
+- Always-predict-0 as a dumb baseline (prevalence ~0.1% on test)
+- Lead time: `event_end - alert_time` if `alert_time < event_end`
+- Reactive baseline: retry (`seq_no>=2`) or train median succeeded duration by `task_type`
 
-## Outputs for Role C (electrical engineer)
+## Outputs for Role C
 
-For each costing-eligible true positive:
-
-```json
-{
-  "instance_name": "ins_123",
-  "machine_id": "m_1486",
-  "decision_time": 18102,
-  "baseline_fire_time": 18400,
-  "event_end": 18550,
-  "waste_window_seconds": 448,
-  "lead_time_seconds": 298
-}
-```
-
-Role C integrates host utilization over `[decision_time, event_end)` (or `[decision_time, baseline_fire_time)` for the lead-time gap) and converts to kWh / liters as a range.
+Use `reports/role_b_handoff.parquet`. Filter `eligible_for_costing=1`. Do not compute kWh/liters in Role B. Join keys back to `instance_events.parquet`: `instance_name`, `machine_id`, `start_time`, `seq_no`, `decision_time`, `test_row_index`.

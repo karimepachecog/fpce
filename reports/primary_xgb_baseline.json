@@ -1,0 +1,374 @@
+{
+  "split_timestamp": 518355,
+  "val_timestamp": 417433,
+  "val_rule": "inner train: start_time < 417433; validation: 417433 <= start_time < 518355; test: start_time >= 518355 (frozen)",
+  "train_time_frac_inner": 0.8,
+  "features": [
+    "task_type",
+    "plan_cpu_frac",
+    "total_seq_no",
+    "instance_num",
+    "plan_mem_frac",
+    "seq_no",
+    "active_instances",
+    "disk_io_percent",
+    "cpu_util_percent",
+    "net_out",
+    "mem_util_percent",
+    "net_in"
+  ],
+  "preprocessing": {
+    "feature_order": [
+      "task_type",
+      "plan_cpu_frac",
+      "total_seq_no",
+      "instance_num",
+      "plan_mem_frac",
+      "seq_no",
+      "active_instances",
+      "disk_io_percent",
+      "cpu_util_percent",
+      "net_out",
+      "mem_util_percent",
+      "net_in"
+    ],
+    "numeric_features": [
+      "plan_cpu_frac",
+      "total_seq_no",
+      "instance_num",
+      "plan_mem_frac",
+      "seq_no",
+      "active_instances",
+      "disk_io_percent",
+      "cpu_util_percent",
+      "net_out",
+      "mem_util_percent",
+      "net_in"
+    ],
+    "categorical_features": [
+      "task_type"
+    ],
+    "task_type_representation": "Ordinal codes from inner-train categories; unknown/NaN stay missing. Passed to XGBoost as pandas 'category' with enable_categorical=True (same codes HistGB uses via categorical_features=[0]). No numeric scaling.",
+    "numeric_imputer": {
+      "strategy": "median",
+      "statistics_from": "inner train only (validation and test unused)",
+      "medians": {
+        "plan_cpu_frac": 0.010416666666666666,
+        "total_seq_no": 1.0,
+        "instance_num": 3709.0,
+        "plan_mem_frac": 0.3,
+        "seq_no": 1.0,
+        "active_instances": 177.0,
+        "disk_io_percent": 8.0,
+        "cpu_util_percent": 44.166666666666664,
+        "net_out": 34.406666666666666,
+        "mem_util_percent": 91.16666666666667,
+        "net_in": 42.27
+      }
+    },
+    "task_type": {
+      "encoder": "sklearn.preprocessing.OrdinalEncoder",
+      "handle_unknown": "use_encoded_value",
+      "unknown_value": "NaN",
+      "encoded_missing_value": "NaN",
+      "train_categories": [
+        "1",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "n_train_categories": 11,
+      "note": "Unseen levels become NaN (missing). Encoder is fit on the training slice only \u2014 never on validation or test."
+    },
+    "scale_pos_weight": 445.24399759903963,
+    "n_inner_train": 7434425,
+    "n_inner_positive": 16660,
+    "n_inner_negative": 7417765,
+    "n_val": 1565780,
+    "n_test": 3974412
+  },
+  "xgb_params": {
+    "objective": "binary:logistic",
+    "eval_metric": "aucpr",
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "min_child_weight": 20,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "random_state": 0,
+    "n_jobs": -1,
+    "tree_method": "hist",
+    "enable_categorical": true,
+    "early_stopping_rounds": 30,
+    "scale_pos_weight": 445.24399759903963,
+    "sklearn_estimator": "XGBClassifier",
+    "best_iteration": 0,
+    "best_score": 0.8293641603355314
+  },
+  "scale_pos_weight": 445.24399759903963,
+  "n_inner_train": 7434425,
+  "n_val": 1565780,
+  "n_test": 3974412,
+  "test_ranking": {
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.9685136398363023,
+    "pr_auc": 0.8383993321789268,
+    "average_precision": 0.8383993321789268
+  },
+  "test_threshold_0.5": {
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.9685136398363023,
+    "pr_auc": 0.8383993321789268,
+    "average_precision": 0.8383993321789268,
+    "threshold": 0.5,
+    "precision": 0.2042584345067415,
+    "recall": 0.8861831656961355,
+    "f1": 0.3319946452476573,
+    "accuracy": 0.9966100645831384,
+    "accuracy_not_useful": true,
+    "true_negatives": 3957591,
+    "false_positives": 13043,
+    "false_negatives": 430,
+    "true_positives": 3348,
+    "confusion_matrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          3957591,
+          13043
+        ],
+        [
+          430,
+          3348
+        ]
+      ]
+    },
+    "n_alerts": 16391,
+    "fp_per_tp": 3.8957586618876943,
+    "alert_rate": 0.00412413207287015,
+    "alert_rate_pct": 0.412413207287015
+  },
+  "test_operational": {
+    "n": 3974412,
+    "n_positive": 3778,
+    "positive_rate": 0.0009505808657985131,
+    "roc_auc": 0.9685136398363023,
+    "pr_auc": 0.8383993321789268,
+    "average_precision": 0.8383993321789268,
+    "threshold": 0.5096072554588318,
+    "precision": 0.2042584345067415,
+    "recall": 0.8861831656961355,
+    "f1": 0.3319946452476573,
+    "accuracy": 0.9966100645831384,
+    "accuracy_not_useful": true,
+    "true_negatives": 3957591,
+    "false_positives": 13043,
+    "false_negatives": 430,
+    "true_positives": 3348,
+    "confusion_matrix": {
+      "labels": [
+        0,
+        1
+      ],
+      "matrix": [
+        [
+          3957591,
+          13043
+        ],
+        [
+          430,
+          3348
+        ]
+      ]
+    },
+    "n_alerts": 16391,
+    "fp_per_tp": 3.8957586618876943,
+    "alert_rate": 0.00412413207287015,
+    "alert_rate_pct": 0.412413207287015
+  },
+  "hist_gb_reference": {
+    "note": "Existing HistGB test scores (full original train). Working threshold 0.9 was frozen in the prior threshold study. XGBoost operational threshold is the validation precision>=0.10 / max-recall cut (not chosen on test).",
+    "threshold_0.5": {
+      "n": 3974412,
+      "n_positive": 3778,
+      "positive_rate": 0.0009505808657985131,
+      "roc_auc": 0.9844181661507554,
+      "pr_auc": 0.8018767510002215,
+      "average_precision": 0.8018767510002215,
+      "threshold": 0.5,
+      "precision": 0.08917680931815207,
+      "recall": 0.9017998941238751,
+      "f1": 0.1623037896291356,
+      "accuracy": 0.9911511438673193,
+      "accuracy_not_useful": true,
+      "true_negatives": 3935836,
+      "false_positives": 34798,
+      "false_negatives": 371,
+      "true_positives": 3407,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            3935836,
+            34798
+          ],
+          [
+            371,
+            3407
+          ]
+        ]
+      },
+      "n_alerts": 38205,
+      "fp_per_tp": 10.213677722336366,
+      "alert_rate": 0.009612742715148807,
+      "alert_rate_pct": 0.9612742715148807
+    },
+    "threshold_operational": {
+      "n": 3974412,
+      "n_positive": 3778,
+      "positive_rate": 0.0009505808657985131,
+      "roc_auc": 0.9844181661507554,
+      "pr_auc": 0.8018767510002215,
+      "average_precision": 0.8018767510002215,
+      "threshold": 0.9,
+      "precision": 0.1406858434869991,
+      "recall": 0.8893594494441504,
+      "f1": 0.24294132533169444,
+      "accuracy": 0.9947310444916129,
+      "accuracy_not_useful": true,
+      "true_negatives": 3950111,
+      "false_positives": 20523,
+      "false_negatives": 418,
+      "true_positives": 3360,
+      "confusion_matrix": {
+        "labels": [
+          0,
+          1
+        ],
+        "matrix": [
+          [
+            3950111,
+            20523
+          ],
+          [
+            418,
+            3360
+          ]
+        ]
+      },
+      "n_alerts": 23883,
+      "fp_per_tp": 6.108035714285714,
+      "alert_rate": 0.006009190793506058,
+      "alert_rate_pct": 0.6009190793506058
+    }
+  },
+  "comparison_at_0.5": {
+    "pr_auc": {
+      "hist_gb": 0.8018767510002215,
+      "xgboost": 0.8383993321789268
+    },
+    "roc_auc": {
+      "hist_gb": 0.9844181661507554,
+      "xgboost": 0.9685136398363023
+    },
+    "precision": {
+      "hist_gb": 0.08917680931815207,
+      "xgboost": 0.2042584345067415
+    },
+    "recall": {
+      "hist_gb": 0.9017998941238751,
+      "xgboost": 0.8861831656961355
+    },
+    "f1": {
+      "hist_gb": 0.1623037896291356,
+      "xgboost": 0.3319946452476573
+    },
+    "true_positives": {
+      "hist_gb": 3407,
+      "xgboost": 3348
+    },
+    "false_positives": {
+      "hist_gb": 34798,
+      "xgboost": 13043
+    },
+    "false_negatives": {
+      "hist_gb": 371,
+      "xgboost": 430
+    },
+    "fp_per_tp": {
+      "hist_gb": 10.213677722336366,
+      "xgboost": 3.8957586618876943
+    },
+    "alert_rate_pct": {
+      "hist_gb": 0.9612742715148807,
+      "xgboost": 0.412413207287015
+    }
+  },
+  "comparison_operational": {
+    "pr_auc": {
+      "hist_gb": 0.8018767510002215,
+      "xgboost": null
+    },
+    "roc_auc": {
+      "hist_gb": 0.9844181661507554,
+      "xgboost": null
+    },
+    "precision": {
+      "hist_gb": 0.1406858434869991,
+      "xgboost": 0.2042584345067415
+    },
+    "recall": {
+      "hist_gb": 0.8893594494441504,
+      "xgboost": 0.8861831656961355
+    },
+    "f1": {
+      "hist_gb": 0.24294132533169444,
+      "xgboost": 0.3319946452476573
+    },
+    "true_positives": {
+      "hist_gb": 3360,
+      "xgboost": 3348
+    },
+    "false_positives": {
+      "hist_gb": 20523,
+      "xgboost": 13043
+    },
+    "false_negatives": {
+      "hist_gb": 418,
+      "xgboost": 430
+    },
+    "fp_per_tp": {
+      "hist_gb": 6.108035714285714,
+      "xgboost": 3.8957586618876943
+    },
+    "alert_rate_pct": {
+      "hist_gb": 0.6009190793506058,
+      "xgboost": 0.412413207287015
+    }
+  },
+  "figures": {
+    "pr_curve": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_pr_curve.png",
+    "threshold_vs_pr": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_threshold_precision_recall.png",
+    "lead_time": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/figures/primary_xgb_lead_time.png"
+  },
+  "scores_path": "/Users/hanniaalvarado/Documents/CursoExxonMobile/Principios de IA/FinalProject/fpce/reports/primary_xgb_test_scores.npz"
+}

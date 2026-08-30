@@ -24,7 +24,5 @@ The kit including the Google laptop sample (~80 MB) is about **4.8 GB**.
 
 Total present: **4.78 GiB** (5,133,642,721 bytes).
 
-After copying, compare each SHA256 above. Role B on a laptop should point
-`fpce-cross-provider` at `attempts_sample.parquet` (the default if that file exists).
-Use the full `attempts.parquet` only on a machine with 16+ GB RAM.
+After copying, compare each SHA256 above. Role B is **frozen** (see `docs/role_b.md`). Overlay this Role A kit first, then generate `reports/role_b_handoff.parquet` and `models/primary_hgb_frozen.joblib` with `fpce-role-b-freeze` (or copy those freeze artifacts if they are provided separately). `fpce-cross-provider` on a laptop should use `attempts_sample.parquet` (the default if that file exists). Use the full `attempts.parquet` only on a machine with 16+ GB RAM.
 
