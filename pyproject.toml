@@ -40,6 +40,7 @@ fpce-supercloud = "fpce.provenance.supercloud:main"
 fpce-cross-provider = "fpce.model.cross_provider:main"
 fpce-operator-scale = "fpce.costing.coefficients:main"
 fpce-role-b-freeze = "fpce.model.freeze:main"
+fpce-role-c-cost = "fpce.costing.cost_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
