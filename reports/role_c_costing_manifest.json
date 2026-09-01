@@ -1,0 +1,10 @@
+{
+  "role": "C",
+  "output_parquet": "role_c_costing.parquet",
+  "sha256": "d9c01cb56ce3bdd5f1b5e7c4b10d4cd11fad7fd704aae83187cffd92d637b3a1",
+  "row_count": 204,
+  "eligible_for_costing_count": 204,
+  "corners_evaluated": 16,
+  "generated_at": "2026-09-01T00:51:55.740918+00:00",
+  "params_toml": "params/physical_cost.toml"
+}
