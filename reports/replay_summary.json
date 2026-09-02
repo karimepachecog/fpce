@@ -1,0 +1,20 @@
+{
+  "role": "D",
+  "status": "completed",
+  "official_model": "HistGradientBoostingClassifier",
+  "model_threshold": 0.9,
+  "n_handoff_rows": 3974412,
+  "n_costed_rows": 1,
+  "n_replay_model_alerts": 23883,
+  "n_replay_baseline_alerts": 1849651,
+  "n_failures": 3778,
+  "n_costing_eligible_failures": 204,
+  "it_kwh_min": 0.01438440185185185,
+  "it_kwh_max": 0.043818,
+  "facility_kwh_min": 0.016542062129629626,
+  "facility_kwh_max": 0.0613452,
+  "water_liters_min": 0.006472980833333333,
+  "water_liters_max": 0.021032640000000002,
+  "delta_lead_time_seconds_mean": 10.0,
+  "delta_lead_time_seconds_median": 10.0
+}
