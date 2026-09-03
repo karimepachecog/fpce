@@ -570,15 +570,15 @@ def add_costs(
             continue
 
         utilization = (
-        _numeric(window[utilization_col])
-        .fillna(0.0)
-        .to_numpy(dtype=float)
-    )
+            _numeric(window[utilization_col])
+            .fillna(0.0)
+            .to_numpy(dtype=float)
+        )
 
-    # Role C translate() expects CPU utilization in the range [0, 1].
-    # The time grid stores CPU utilization as a percentage [0, 100].
-    if utilization_col == "cpu_util_percent":
-        utilization = utilization / 100.0
+        # Role C translate() expects CPU utilization in the range [0, 1].
+        # The time grid stores CPU utilization as a percentage [0, 100].
+        if utilization_col == "cpu_util_percent":
+            utilization = utilization / 100.0
 
         cost = calculate_cost(
             utilization_series=utilization,

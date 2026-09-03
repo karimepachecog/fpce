@@ -112,14 +112,14 @@
       "facility_kwh_min": 6855.888331581749,
       "facility_kwh_max": 24546.409802530045,
       "water_liters_min": 2682.738912358076,
-      "water_liters_max": 8415.911932296014
+      "water_liters_max": 8415.911932296012
     },
     "net": {
       "it_kwh_min": -17529.864392297895,
       "it_kwh_max": -5951.960943261836,
       "facility_kwh_min": -24542.631515880086,
       "facility_kwh_max": -6842.334813700972,
-      "water_liters_min": -8414.433472302551,
+      "water_liters_min": -8414.43347230255,
       "water_liters_max": -2678.0919919418093
     },
     "n_false_positives": 1848844,

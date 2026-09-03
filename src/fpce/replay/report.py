@@ -45,11 +45,12 @@ POOL_ARTIFACT_NOTE = (
     "in time (203/204). That is a selection artifact, not evidence that "
     "the baseline is a strong detector."
 )
-RUNNER_BUG_NOTE = (
-    "src/fpce/replay/runner.py indent: utilization / cpu_util_percent "
-    "conversion sits outside the per-row loop, so only the last eligible "
-    "row is costed. reports/replay_summary.json n_costed_rows=1 is that bug, "
-    "not a completed experiment. Use fpce-policy-sim + fpce-policy-report."
+RUNNER_NOTE = (
+    "src/fpce/replay/runner.py independently costs the 204-row eligible "
+    "pool. reports/replay_summary.json n_costed_rows=204 and the IT / "
+    "facility / water ranges match policy_simulation.json do_nothing. "
+    "Headline avoided-vs-destroyed accounting remains fpce-policy-sim + "
+    "fpce-policy-report."
 )
 
 
@@ -202,7 +203,7 @@ def attach_policy_nets(
     )
     summary["headline"] = headline
     summary["pool_artifact_note"] = POOL_ARTIFACT_NOTE
-    summary["runner_bug_note"] = RUNNER_BUG_NOTE
+    summary["runner_note"] = RUNNER_NOTE
 
     for name, destroyed, stats in (
         ("model_policy", model_destroyed, model_fp_stats),

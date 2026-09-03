@@ -1,5 +1,15 @@
 """XGB v2 winner selection is validation-only."""
 
+import pytest
+
+try:
+    import xgboost  # noqa: F401
+except Exception:
+    pytest.skip(
+        "xgboost OpenMP runtime (libomp) is not installed",
+        allow_module_level=True,
+    )
+
 from fpce.model.xgboost_v2 import all_stalled, pick_winner
 
 

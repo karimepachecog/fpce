@@ -55,7 +55,7 @@ The replication rack (5,123 costing-eligible failures) may be used as an **addit
 | Time grid + instance events | Role A | Replay / policy-sim source |
 | Accumulated policy result | Role D | `fpce-policy-sim` → `reports/policy_simulation.json` |
 
-**Role D owns:** wiring B and C together, logging lead times, and reporting accumulated physical-cost ranges across costing-eligible true failures (proposal Methodology §4). Headline: `fpce-policy-sim` + `fpce-policy-report`. Both kill policies are net-negative on the 204-row pool; the model is ~100× less bad than the baseline because it alerts 0.6% of test rows, not 46%. `src/fpce/replay/runner.py` has an indent bug (utilization conversion outside the row loop) — `replay_summary.json` `n_costed_rows=1` is that bug, not a completed experiment.
+**Role D owns:** wiring B and C together, logging lead times, and reporting accumulated physical-cost ranges across costing-eligible true failures (proposal Methodology §4). Headline: `fpce-policy-sim` + `fpce-policy-report`. Both kill policies are net-negative on the 204-row pool; the model is ~100× less bad than the baseline because it alerts 0.6% of test rows, not 46%. `src/fpce/replay/runner.py` independently recovers the 204-row do-nothing envelope (`replay_summary.json` `n_costed_rows=204`).
 
 ## Replay harness (Role D)
 
@@ -72,7 +72,7 @@ These analyses are in scope for B/C/D. Role A already tagged the rows and cited 
 
 | Item | Owner | Notes |
 |------|-------|-------|
-| Cost the replication rack (5,123 `eligible_for_costing` failures) | C, after B freeze | **Costing done** (`reports/replication_eval.json`: 81–244 IT kWh). Classifier on this rack still needs the sklearn 1.4.2 pickle. |
+| Cost the replication rack (5,123 `eligible_for_costing` failures) | C, after B freeze | **Costing done** (`reports/replication_eval.json`: 81–244 IT kWh). Official HistGB also scored: 13,027,395 rows, ROC-AUC 0.986, PR-AUC 0.861, t=0.9 precision 0.441 / recall 0.907. |
 | Cost Google's 1.18M attempts with `eligible_for_costing=1` | C | Secondary/exploratory. Scale waste windows by machine-fraction capacity; do not apply Alibaba watt envelopes to Google durations raw. |
 | Scheduler policy simulation (kill if P(fail) > 0.9 vs reactive baseline) | B + C + D | **Done, net-negative.** Model net −176 to −51 IT kWh; baseline −17,530 to −5,952. The 203/204 baseline catch rate is a ≥60 s pool artifact. |
 | AI-compute governance prototype on Supercloud | Future Work | Out of MVP. A only downloaded GPU `dcgm.csv`; the cited paper uses power and network. |

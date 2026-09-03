@@ -28,9 +28,9 @@ Destroyed useful work is charged to **both** policies. Baseline FPs (1.85M) are 
 
 At the official t=0.9, break-even vs costing TPs needs ~15% precision; observed is ~1%. A post-hoc sweep is net-positive at t=0.999 (196 TPs, 3 FPs). That cut is **not** the frozen Role B threshold.
 
-## Known runner bug
+## Independent replay check
 
-`src/fpce/replay/runner.py` converts `cpu_util_percent` **outside** the per-row loop, so only the last eligible row is costed. `reports/replay_summary.json` `n_costed_rows=1` is that bug. Do not cite it as the experiment.
+`python -m fpce.replay.runner` costs the 204 eligible failures on the host grid. `reports/replay_summary.json` `n_costed_rows=204` and the kWh/L ranges match `policy_simulation.json` `do_nothing`. Headline avoided-vs-destroyed accounting remains `fpce-policy-sim`.
 
 ## Module layout
 

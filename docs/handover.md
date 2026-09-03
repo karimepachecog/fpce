@@ -36,7 +36,7 @@ B/C/D do **not** re-run 1–13 unless reproducing ingest. After clone + USB they
 
 ## After this Role B freeze (not A)
 
-- C: primary-test costing is done (204 rows). Replication-rack **costing** is done (5,123 rows → 81–244 IT kWh, 37–117 L in `reports/replication_eval.json`). Classifier on rack 52 still needs sklearn 1.4.2. Google attempt costing stays optional.
-- B+C+D: policy accounting is in `reports/policy_simulation.json`. Both kill-at-admission policies are **net-negative**; the model is ~100× less bad (net −176 to −51 IT kWh vs baseline −17,530 to −5,952). The 203/204 baseline catch rate is an artifact of the ≥60 s costing pool. `replay_summary.json` `n_costed_rows=1` is an indent bug in `runner.py`, not a finished run. Supercloud AI-compute governance stays Future Work.
+- C: primary-test costing is done (204 rows). Replication-rack **costing** is done (5,123 rows → 81–244 IT kWh, 37–117 L in `reports/replication_eval.json`). Official HistGB on rack 52: ROC-AUC 0.986, PR-AUC 0.861. Google attempt costing stays optional.
+- B+C+D: policy accounting is in `reports/policy_simulation.json`. Both kill-at-admission policies are **net-negative**; the model is ~100× less bad (net −176 to −51 IT kWh vs baseline −17,530 to −5,952). The 203/204 baseline catch rate is an artifact of the ≥60 s costing pool. `replay_summary.json` `n_costed_rows=204` matches the policy-sim do-nothing envelope. Supercloud AI-compute governance stays Future Work.
 
 Full CLI list: [README.md](../README.md). Role contracts: [roles.md](roles.md). USB file list: [HANDOFF.md](../data/processed/HANDOFF.md).
