@@ -8,8 +8,8 @@ Fault-triggered Physical Cost Estimator (FPCE) — predicting doomed batch insta
 |------|------------|------|-------------|
 | **A — Data engineer** | Pipeline & data | Trace ingestion, instance labels, coefficient registry | `instance_events.parquet`, `time_grid.parquet`, `params/physical_cost.toml` |
 | **B — Data scientist** | ML | Features, classifier, reactive baseline, lead-time events | **Frozen.** HistGB t=0.9: `models/primary_hgb_frozen.joblib`, `reports/role_b_handoff.parquet`, [docs/role_b.md](docs/role_b.md) |
-| **C — Electrical engineer** | Physical cost | Fan et al. power model + PUE + WUE | kWh/liter **ranges** per doomed instance (`src/fpce/costing/`) |
-| **D — Software engineer** | Integration | Replay harness, experiment runner | End-to-end result (`src/fpce/replay/`) |
+| **C — Electrical engineer** | Physical cost | Fan et al. power model + PUE + WUE | kWh/liter **ranges** on the 204 costing-eligible test failures (`reports/role_c_costing.parquet`) |
+| **D — Software engineer** | Integration | Replay harness + policy sim | Accumulated ranges vs reactive baseline (`reports/policy_simulation.json`) |
 
 ## Quickstart
 
@@ -103,18 +103,22 @@ Canonical document: [docs/role_b.md](docs/role_b.md).
 
 Inputs used: `data/processed/primary/instance_events.parquet`, `time_grid.parquet`, `primary_time_split.json`, `params/feature_contract.json`.
 
-## What Role C (electrical engineer) consumes
+## What Role C (electrical engineer) produced
 
-Role C has **not** started. Do not compute kWh or water liters yet.
+`fpce-role-c-cost` runs Fan et al. over 16 coefficient corners on `eligible_for_costing=1`. Output: `reports/role_c_costing.parquet` (204 primary-test rows) and `reports/role_c_costing_manifest.json`. Water = IT kWh × WUE. Facility energy = IT kWh × PUE. No cooling share.
 
-When it starts: `reports/role_b_handoff.parquet` filtered to `eligible_for_costing=1`, host utilization on `[decision_time, event_end)` from `time_grid.parquet`, and `params/physical_cost.toml`. Water = IT kWh × WUE. Facility energy = IT kWh × PUE. No cooling share. See [docs/role_b.md](docs/role_b.md).
+Replication rack (domain 52, costing only): **5,123** failures → **81–244 IT kWh**, 93–342 facility kWh, **37–117 L** (`reports/replication_eval.json`). The official HistGB pickle was not scored there (sklearn 1.4.2 vs this env). Google attempt costing is still out of MVP.
 
-## What Role D (software engineer) consumes
+## What Role D (software engineer) produced
 
-- Frozen classifier `models/primary_hgb_frozen.joblib` and reactive baseline from Role B
-- Per-event table `reports/role_b_handoff.parquet`
-- Cost translation API from Role C (not yet)
-- Instance events + time grid for simulated real-time replay (`fpce-replay`)
+**Headline:** both admission-kill policies are **net-negative** on the 204-row costing pool. The model is **~100× less bad** than the reactive baseline because it fires on 0.6% of test rows (23,883 alerts), not 46.5% (1,849,651).
+
+- `fpce-policy-sim` + `fpce-policy-report` write `reports/policy_simulation.json` and `reports/figures/policy_simulation.png` (avoided vs destroyed, log scale).
+- Doomed-pool waste if nobody kills: **3.39–9.97 IT kWh**. Model t=0.9 avoids 3.32–9.78 but **destroys 60–179 IT kWh** of healthy work (20,523 FPs). Net **−176 to −51 IT kWh**.
+- Baseline avoids 3.29–9.68 and **destroys 5,962–17,533 IT kWh** (1,848,844 FPs, 50k sample × 37). Net **−17,530 to −5,952 IT kWh**.
+- The 203/204 “baseline catch rate” is a **pool artifact**: costing rows last ≥ 60 s and the baseline fires at ~10 s, so it almost always arrives. It is not a strong detector (46% of the whole test is an alert).
+- Break-even vs costing TPs at t=0.9 needs **~15% precision** (observed **~1%**). A post-hoc sweep (`reports/policy_threshold_sweep.json`) goes net-positive at t=0.999 (196 TPs, 3 FPs) — that cut is **not** the official Role B threshold.
+- `src/fpce/replay/runner.py` has an indent bug (`cpu_util_percent` conversion sits outside the row loop), so `replay_summary.json` `n_costed_rows=1` is not a finished experiment. Use `fpce-policy-sim`.
 
 ## Documentation
 
@@ -126,6 +130,10 @@ When it starts: `reports/role_b_handoff.parquet` filtered to `eligible_for_costi
 - [docs/coefficients.md](docs/coefficients.md) — physical cost identities and provenance
 - [docs/google_export.md](docs/google_export.md) — BigQuery export schema and Role A/B handoff for Google 2019
 - [reports/data_quality.md](reports/data_quality.md) — measured dataset summary
+- [reports/policy_simulation.json](reports/policy_simulation.json) — avoided, destroyed, and net kWh/L (204-row pool + FP collateral)
+- [reports/policy_threshold_sweep.json](reports/policy_threshold_sweep.json) — net vs threshold; break-even precision
+- [reports/figures/policy_simulation.png](reports/figures/policy_simulation.png) — avoided vs destroyed (log) and alert volume
+- [reports/replication_eval.json](reports/replication_eval.json) — rack-52 costing (5,123 rows)
 
 ## CLI entry points
 
@@ -143,9 +151,13 @@ After `pip install -e .`:
 | `fpce-google-quality` | Quality JSON for the Google attempt table |
 | `fpce-quality-report` | Generate quality JSON |
 | `fpce-freeze-split` | Freeze time-based train/test split |
-| `fpce-replay` | Stream time_grid as JSONL |
+| `fpce-replay` | Stream time_grid as JSONL (telemetry stub) |
 | `fpce-specpower` | Scrape SPEC Power envelope (per-node, hardware-matched) |
 | `fpce-supercloud` | Fit Fan form to Supercloud GPU power (shape check) |
 | `fpce-cross-provider` | Train on Alibaba, score on Google (ROC-AUC / PR-AUC / lift) |
 | `fpce-operator-scale` | Operator ESG PUE/WUE vs LBNL (multiplicative scale, not kWh) |
 | `fpce-role-b-freeze` | Persist frozen HistGB bundle + Role B handoff parquet |
+| `fpce-role-c-cost` | Fan / PUE / WUE ranges for costing-eligible handoff rows |
+| `fpce-policy-sim` | Accumulate 204-row ranges; kill-at-alert vs reactive baseline |
+| `fpce-policy-report` | Symmetric avoided/destroyed nets, threshold sweep, figure |
+| `fpce-replication-check` | Replication-rack Fan costing (classifier if the 1.4.2 pickle loads) |

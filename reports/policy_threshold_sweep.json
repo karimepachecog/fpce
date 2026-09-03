@@ -1,0 +1,245 @@
+{
+  "thresholds": [
+    0.5,
+    0.9,
+    0.99,
+    0.999,
+    0.9999
+  ],
+  "rows": [
+    {
+      "threshold": 0.5,
+      "n_costing_tp_caught": 202,
+      "n_fp": 34735,
+      "avoided": {
+        "it_kwh_min": 3.3760946571759263,
+        "it_kwh_max": 9.948423458333334,
+        "facility_kwh_min": 3.882508855752315,
+        "facility_kwh_max": 13.927792841666664,
+        "water_liters_min": 1.5192425957291669,
+        "water_liters_max": 4.77524326
+      },
+      "destroyed": {
+        "it_kwh_min": 262.7047347279722,
+        "it_kwh_max": 776.7085596950001,
+        "facility_kwh_min": 302.11044493716804,
+        "facility_kwh_max": 1087.3919835729998,
+        "water_liters_min": 118.21713062758752,
+        "water_liters_max": 372.82010865359996
+      },
+      "net": {
+        "it_kwh_min": -773.3324650378241,
+        "it_kwh_max": -252.75631126963887,
+        "facility_kwh_min": -1083.5094747172475,
+        "facility_kwh_max": -288.1826520955014,
+        "water_liters_min": -371.3008660578708,
+        "water_liters_max": -113.44188736758753
+      },
+      "equilibrium": {
+        "precision_mid": 0.3120764509690827,
+        "precision_pessimistic": 0.5722679005566451,
+        "precision_optimistic": 0.13312355476253943,
+        "observed_precision_vs_costing_tp": 0.005781835876005381,
+        "n_costing_tp": 202,
+        "n_fp": 34735,
+        "note": "Break-even precision against costing-eligible true positives only (p * avg_saved > (1-p) * avg_destroyed). Observed precision vs the 204-row pool is n_costing_TP / (n_costing_TP + n_FP)."
+      }
+    },
+    {
+      "threshold": 0.9,
+      "n_costing_tp_caught": 197,
+      "n_fp": 20507,
+      "avoided": {
+        "it_kwh_min": 3.3194750713981485,
+        "it_kwh_max": 9.778211245000001,
+        "facility_kwh_min": 3.8173963321078705,
+        "facility_kwh_max": 13.689495742999998,
+        "water_liters_min": 1.4937637821291667,
+        "water_liters_max": 4.6935413976
+      },
+      "destroyed": {
+        "it_kwh_min": 60.45847491955092,
+        "it_kwh_max": 179.08758275361112,
+        "facility_kwh_min": 69.52724615748356,
+        "facility_kwh_max": 250.72261585505555,
+        "water_liters_min": 27.20631371379792,
+        "water_liters_max": 85.96203972173332
+      },
+      "net": {
+        "it_kwh_min": -175.76810768221296,
+        "it_kwh_max": -50.68026367455092,
+        "facility_kwh_min": -246.90521952294768,
+        "facility_kwh_max": -55.837750414483565,
+        "water_liters_min": -84.46827593960415,
+        "water_liters_max": -22.512772316197918
+      },
+      "equilibrium": {
+        "precision_mid": 0.14943901473017646,
+        "precision_pessimistic": 0.34135773784149515,
+        "precision_optimistic": 0.056066478163767086,
+        "observed_precision_vs_costing_tp": 0.009515069551777434,
+        "n_costing_tp": 197,
+        "n_fp": 20507,
+        "note": "Break-even precision against costing-eligible true positives only (p * avg_saved > (1-p) * avg_destroyed). Observed precision vs the 204-row pool is n_costing_TP / (n_costing_TP + n_FP)."
+      }
+    },
+    {
+      "threshold": 0.99,
+      "n_costing_tp_caught": 196,
+      "n_fp": 14501,
+      "avoided": {
+        "it_kwh_min": 3.305410967231481,
+        "it_kwh_max": 9.737635828333335,
+        "facility_kwh_min": 3.8012226123162036,
+        "facility_kwh_max": 13.632690159666664,
+        "water_liters_min": 1.4874349352541667,
+        "water_liters_max": 4.6740651976
+      },
+      "destroyed": {
+        "it_kwh_min": 40.83275436927778,
+        "it_kwh_max": 121.90122930111112,
+        "facility_kwh_min": 46.957667524669446,
+        "facility_kwh_max": 170.66172102155554,
+        "water_liters_min": 18.374739466175,
+        "water_liters_max": 58.512590064533335
+      },
+      "net": {
+        "it_kwh_min": -118.59581833387963,
+        "it_kwh_max": -31.095118540944444,
+        "facility_kwh_min": -166.86049840923934,
+        "facility_kwh_max": -33.32497736500278,
+        "water_liters_min": -57.02515512927917,
+        "water_liters_max": -13.700674268575
+      },
+      "equilibrium": {
+        "precision_mid": 0.14430356060587052,
+        "precision_pessimistic": 0.33265351543106864,
+        "precision_optimistic": 0.05363776435210519,
+        "observed_precision_vs_costing_tp": 0.013336054977206233,
+        "n_costing_tp": 196,
+        "n_fp": 14501,
+        "note": "Break-even precision against costing-eligible true positives only (p * avg_saved > (1-p) * avg_destroyed). Observed precision vs the 204-row pool is n_costing_TP / (n_costing_TP + n_FP)."
+      }
+    },
+    {
+      "threshold": 0.999,
+      "n_costing_tp_caught": 196,
+      "n_fp": 3,
+      "avoided": {
+        "it_kwh_min": 3.305410967231481,
+        "it_kwh_max": 9.737635828333335,
+        "facility_kwh_min": 3.8012226123162036,
+        "facility_kwh_max": 13.632690159666664,
+        "water_liters_min": 1.4874349352541667,
+        "water_liters_max": 4.6740651976
+      },
+      "destroyed": {
+        "it_kwh_min": 0.10085580722222223,
+        "it_kwh_max": 0.27589365555555556,
+        "facility_kwh_min": 0.11598417830555556,
+        "facility_kwh_max": 0.3862511177777777,
+        "water_liters_min": 0.045385113250000005,
+        "water_liters_max": 0.13242895466666665
+      },
+      "net": {
+        "it_kwh_min": 3.0295173116759253,
+        "it_kwh_max": 9.636780021111113,
+        "facility_kwh_min": 3.4149714945384257,
+        "facility_kwh_max": 13.516705981361108,
+        "water_liters_min": 1.3550059805875,
+        "water_liters_max": 4.62868008435
+      },
+      "equilibrium": {
+        "precision_mid": 0.6536387048783581,
+        "precision_pessimistic": 0.8450380122055348,
+        "precision_optimistic": 0.40358263826095986,
+        "observed_precision_vs_costing_tp": 0.9849246231155779,
+        "n_costing_tp": 196,
+        "n_fp": 3,
+        "note": "Break-even precision against costing-eligible true positives only (p * avg_saved > (1-p) * avg_destroyed). Observed precision vs the 204-row pool is n_costing_TP / (n_costing_TP + n_FP)."
+      }
+    },
+    {
+      "threshold": 0.9999,
+      "n_costing_tp_caught": 47,
+      "n_fp": 0,
+      "avoided": {
+        "it_kwh_min": 0.5727669224629629,
+        "it_kwh_max": 1.7574836699999996,
+        "facility_kwh_min": 0.6586819608324074,
+        "facility_kwh_max": 2.460477138,
+        "water_liters_min": 0.25774511510833337,
+        "water_liters_max": 0.8435921616000001
+      },
+      "destroyed": {
+        "it_kwh_min": 0.0,
+        "it_kwh_max": 0.0,
+        "facility_kwh_min": 0.0,
+        "facility_kwh_max": 0.0,
+        "water_liters_min": 0.0,
+        "water_liters_max": 0.0
+      },
+      "net": {
+        "it_kwh_min": 0.5727669224629629,
+        "it_kwh_max": 1.7574836699999996,
+        "facility_kwh_min": 0.6586819608324074,
+        "facility_kwh_max": 2.460477138,
+        "water_liters_min": 0.25774511510833337,
+        "water_liters_max": 0.8435921616000001
+      },
+      "equilibrium": {
+        "precision": null,
+        "note": "no TPs or FPs"
+      }
+    }
+  ],
+  "best_threshold_by_pessimistic_net": 0.999,
+  "best_row": {
+    "threshold": 0.999,
+    "n_costing_tp_caught": 196,
+    "n_fp": 3,
+    "avoided": {
+      "it_kwh_min": 3.305410967231481,
+      "it_kwh_max": 9.737635828333335,
+      "facility_kwh_min": 3.8012226123162036,
+      "facility_kwh_max": 13.632690159666664,
+      "water_liters_min": 1.4874349352541667,
+      "water_liters_max": 4.6740651976
+    },
+    "destroyed": {
+      "it_kwh_min": 0.10085580722222223,
+      "it_kwh_max": 0.27589365555555556,
+      "facility_kwh_min": 0.11598417830555556,
+      "facility_kwh_max": 0.3862511177777777,
+      "water_liters_min": 0.045385113250000005,
+      "water_liters_max": 0.13242895466666665
+    },
+    "net": {
+      "it_kwh_min": 3.0295173116759253,
+      "it_kwh_max": 9.636780021111113,
+      "facility_kwh_min": 3.4149714945384257,
+      "facility_kwh_max": 13.516705981361108,
+      "water_liters_min": 1.3550059805875,
+      "water_liters_max": 4.62868008435
+    },
+    "equilibrium": {
+      "precision_mid": 0.6536387048783581,
+      "precision_pessimistic": 0.8450380122055348,
+      "precision_optimistic": 0.40358263826095986,
+      "observed_precision_vs_costing_tp": 0.9849246231155779,
+      "n_costing_tp": 196,
+      "n_fp": 3,
+      "note": "Break-even precision against costing-eligible true positives only (p * avg_saved > (1-p) * avg_destroyed). Observed precision vs the 204-row pool is n_costing_TP / (n_costing_TP + n_FP)."
+    }
+  },
+  "note": "Avoided = Role C full-window cost on costing-eligible failures with model_score >= threshold (kill at admission). Destroyed = Fan on healthy jobs with score >= 0.5, then filtered.",
+  "official_t_0.9_equilibrium": {
+    "precision_mid": 0.14933990890285387,
+    "precision_pessimistic": 0.3411824087121381,
+    "precision_optimistic": 0.05602521687326155,
+    "observed_precision_vs_costing_tp": 0.009507722007722008,
+    "n_costing_tp": 197,
+    "n_fp": 20523,
+    "note": "Break-even precision against costing-eligible true positives only (p * avg_saved > (1-p) * avg_destroyed). Observed precision vs the 204-row pool is n_costing_TP / (n_costing_TP + n_FP)."
+  }
+}

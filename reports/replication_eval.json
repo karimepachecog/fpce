@@ -1,0 +1,33 @@
+{
+  "role": "C_replication_costing",
+  "rack": "replication",
+  "status": "costing_only",
+  "classifier_skipped": "Frozen HistGB pickle is sklearn 1.4.2; this environment cannot unpickle it (Python 3.13 / scikit-learn 1.9). Classification metrics were not computed. Fan costing does not need the model.",
+  "note": "Same 8-day window and hardware class as the primary rack. This is a replication check, not an out-of-distribution test.",
+  "costing": {
+    "n_costing_eligible": 5123,
+    "n_model_alerts": 0,
+    "do_nothing": {
+      "it_kwh_min": 81.19504257815733,
+      "it_kwh_max": 244.33539381722213,
+      "facility_kwh_min": 93.37429896488098,
+      "facility_kwh_max": 342.0695513441113,
+      "water_liters_min": 36.537769160170704,
+      "water_liters_max": 117.28098903226697
+    },
+    "model_avoided": {
+      "it_kwh_min": 0.0,
+      "it_kwh_max": 0.0,
+      "facility_kwh_min": 0.0,
+      "facility_kwh_max": 0.0,
+      "water_liters_min": 0.0,
+      "water_liters_max": 0.0
+    }
+  },
+  "n_parameter_corners": 16,
+  "primary_test_costing_reference": {
+    "n": 204,
+    "it_kwh_min": 3.385,
+    "it_kwh_max": 9.974
+  }
+}

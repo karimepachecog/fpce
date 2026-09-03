@@ -1,4 +1,4 @@
-# Role C — Physical cost translation (contract)
+# Role C — Physical cost translation
 
 **Owner:** Electrical engineer (Role C). Role A provides the coefficient registry; Role C implements the Fan et al. / PUE / WUE arithmetic.
 
@@ -8,7 +8,7 @@
 |--------|----------|
 | Role A | `params/physical_cost.toml` |
 | Role A | `fpce.costing.coefficients.load_physical_cost_params()` |
-| Role B (frozen) | `reports/role_b_handoff.parquet` — filter `eligible_for_costing=1`. Columns include `decision_time`, `event_end`, `model_alert_time`, `baseline_alert_time`. Do not compute kWh/liters here. |
+| Role B (frozen) | `reports/role_b_handoff.parquet` — filter `eligible_for_costing=1`. Columns include `decision_time`, `event_end`, `model_alert_time`, `baseline_alert_time`. |
 
 ## Coefficient registry (Role A deliverable)
 
@@ -19,9 +19,9 @@ params = load_physical_cost_params()
 corners = params.sweep()  # currently 16; drops P_idle > P_peak if the envelope ever overlaps
 ```
 
-Operator-declared PUE/WUE (`fpce-operator-scale`) live in `[[operators]]`. They do **not** replace the LBNL default ranges. `operator_scale_vs_national()` reports how water and facility energy would scale for the same IT kWh. Role C still implements the Fan integral.
+Operator-declared PUE/WUE (`fpce-operator-scale`) live in `[[operators]]`. They do **not** replace the LBNL default ranges. `operator_scale_vs_national()` reports how water and facility energy would scale for the same IT kWh.
 
-## Translation layer (Role C to implement)
+## Translation layer (implemented)
 
 Identities (see `docs/coefficients.md`):
 
@@ -30,30 +30,27 @@ Identities (see `docs/coefficients.md`):
 3. **Facility kWh:** `IT_kWh * PUE` (LBNL 2024). Separate line item.
 4. **Water liters:** `IT_kWh * WUE` (LBNL 2024 × Green Grid WP#35). **Do not** multiply by cooling share or PUE first.
 
-Every output must be a **range** from sweeping coefficient corners, not a point estimate.
+Every output is a **range** from sweeping coefficient corners, not a point estimate.
 
 ```python
-def estimate_it_kwh(utilization_series, dt_seconds, p_idle_watts, p_peak_watts) -> float:
-    """Role C: implement Fan et al. integral. Not implemented in Role A."""
-    raise NotImplementedError
+from fpce.costing.translate import translate
 
-def estimate_water_liters(it_kwh: float, wue_l_per_kwh: float) -> float:
-    """Role C: it_kwh * wue. Not implemented in Role A."""
-    raise NotImplementedError
-
-def estimate_facility_kwh(it_kwh: float, pue: float) -> float:
-    """Role C: it_kwh * pue. Not implemented in Role A."""
-    raise NotImplementedError
+result = translate(utilization_series, dt_seconds, corner)
+# result.it_kwh / facility_kwh / water_liters
 ```
 
-## Suggested module layout (Role C to implement)
+CLI: `fpce-role-c-cost` writes `reports/role_c_costing.parquet` (204 primary-test rows) and `reports/role_c_costing_manifest.json`. Grid `cpu_util_percent` is divided by 100 before Fan.
+
+Module layout:
 
 ```
 src/fpce/costing/
-  coefficients.py   # DONE — loader + sweep (Role A)
-  translate.py      # Role C — kWh and liter estimation
-  sensitivity.py    # Role C — report range vs coefficient choices
+  coefficients.py   # loader + sweep (Role A)
+  translate.py      # Fan integral + PUE/WUE (Role C)
+  cost_cli.py       # fpce-role-c-cost
 ```
+
+`sensitivity.py` (range vs individual coefficient choices) was suggested and is not in this MVP. Replication-rack and Google costing are also out of this pass.
 
 ## Out of scope
 

@@ -31,6 +31,10 @@ reports/*.npz
 # Full-test Role B handoff table (~all eligible test rows; regenerable)
 reports/role_b_handoff.parquet
 
+# Per-row costing / policy tables (JSON summaries stay tracked)
+reports/role_c_costing.parquet
+reports/policy_simulation.parquet
+
 # Frozen model binaries (share separately; regenerable via fpce-role-b-freeze)
 *.joblib
 

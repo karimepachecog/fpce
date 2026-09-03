@@ -1,1 +1,1 @@
-"""Telemetry replay harness (Role D contract stub)."""
+"""Replay harness and policy simulation (Role D)."""

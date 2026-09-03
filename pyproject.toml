@@ -18,6 +18,7 @@ dependencies = [
     "scikit-learn>=1.3",
     "xgboost>=2.0",
     "duckdb>=1.0",
+    "matplotlib>=3.8",
 ]
 
 [project.optional-dependencies]
@@ -41,6 +42,9 @@ fpce-cross-provider = "fpce.model.cross_provider:main"
 fpce-operator-scale = "fpce.costing.coefficients:main"
 fpce-role-b-freeze = "fpce.model.freeze:main"
 fpce-role-c-cost = "fpce.costing.cost_cli:main"
+fpce-policy-sim = "fpce.replay.policy:main"
+fpce-policy-report = "fpce.replay.report:main"
+fpce-replication-check = "fpce.model.replication:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

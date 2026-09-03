@@ -21,7 +21,7 @@
 
 ## Role B → Role C (electrical engineer)
 
-Role B is **frozen**. Full contract: [role_b.md](role_b.md). **Do not compute kWh or liters until Role C starts.**
+Role B is **frozen**. Full contract: [role_b.md](role_b.md). Role C costing on the primary-test pool is done (`reports/role_c_costing.parquet`, 204 rows).
 
 | Deliverable | Path | Notes |
 |-------------|------|-------|
@@ -51,18 +51,20 @@ The replication rack (5,123 costing-eligible failures) may be used as an **addit
 | Trained classifier | `models/primary_hgb_frozen.joblib` | Score at `decision_time`; threshold 0.9. See `fpce.model.freeze.predict_proba_with_bundle` |
 | Frozen-test scores | `reports/role_b_handoff.parquet` | Includes `model_alert`, reactive times, lead times |
 | Reactive baseline | `src/fpce/model/baseline.py` | Train medians in `reports/primary_hgb_lead_time.json` |
-| Cost translation | Role C | Not implemented yet (kWh/liter ranges) |
-| Time grid + instance events | Role A | Replay source |
+| Cost translation | Role C | `fpce.costing.translate.translate()`; 204-row `reports/role_c_costing.parquet` |
+| Time grid + instance events | Role A | Replay / policy-sim source |
+| Accumulated policy result | Role D | `fpce-policy-sim` → `reports/policy_simulation.json` |
 
-**Role D owns:** wiring B and C together in the replay harness, logging lead times, and reporting accumulated physical-cost ranges across true-positive doomed instances (proposal Methodology §4).
+**Role D owns:** wiring B and C together, logging lead times, and reporting accumulated physical-cost ranges across costing-eligible true failures (proposal Methodology §4). Headline: `fpce-policy-sim` + `fpce-policy-report`. Both kill policies are net-negative on the 204-row pool; the model is ~100× less bad than the baseline because it alerts 0.6% of test rows, not 46%. `src/fpce/replay/runner.py` has an indent bug (utilization conversion outside the row loop) — `replay_summary.json` `n_costed_rows=1` is that bug, not a completed experiment.
 
 ## Replay harness (Role D)
 
 ```bash
+fpce-policy-sim
 fpce-replay --rack primary --output replay.jsonl --limit 100
 ```
 
-Streams `time_grid.parquet` as simulated real-time JSONL. Role D extends this so that, when an instance reaches `decision_time`, the classifier and (on TP) the cost translator run.
+`fpce-policy-sim` joins `role_b_handoff.parquet` (`failed=1`, `eligible_for_costing=1`) with Role C ranges, re-integrates Fan on `[alert_time, event_end)` for model and baseline alerts, and writes `reports/policy_simulation.json`. `fpce-replay` streams `time_grid.parquet` as JSONL.
 
 ## After Role B freezes primary-rack evaluation (not Role A)
 
@@ -70,9 +72,9 @@ These analyses are in scope for B/C/D. Role A already tagged the rows and cited 
 
 | Item | Owner | Notes |
 |------|-------|-------|
-| Cost the replication rack (5,123 `eligible_for_costing` failures) | C, after B freeze | Extra costing pool, not training data. Combine with the primary 4,924 / test 204. |
+| Cost the replication rack (5,123 `eligible_for_costing` failures) | C, after B freeze | **Costing done** (`reports/replication_eval.json`: 81–244 IT kWh). Classifier on this rack still needs the sklearn 1.4.2 pickle. |
 | Cost Google's 1.18M attempts with `eligible_for_costing=1` | C | Secondary/exploratory. Scale waste windows by machine-fraction capacity; do not apply Alibaba watt envelopes to Google durations raw. |
-| Scheduler policy simulation (kill if P(fail) > threshold vs reactive baseline) | B + C + D | Needs the official classifier, Fan integral, and replay. |
+| Scheduler policy simulation (kill if P(fail) > 0.9 vs reactive baseline) | B + C + D | **Done, net-negative.** Model net −176 to −51 IT kWh; baseline −17,530 to −5,952. The 203/204 baseline catch rate is a ≥60 s pool artifact. |
 | AI-compute governance prototype on Supercloud | Future Work | Out of MVP. A only downloaded GPU `dcgm.csv`; the cited paper uses power and network. |
 
 `fpce-cross-provider` is a **Role A adapter smoke-test** (HistGB on overlapping `*_frac` columns). Role B still owns the full classifier, baseline, and lead-time events.

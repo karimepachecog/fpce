@@ -10,9 +10,9 @@
 
 ## Abstract
 
-Warehouse-scale computers expend energy and cooling water on batch instances that will fail, but that physical cost remains invisible under reactive monitoring and static PUE/WUE reporting. We propose a Fault-triggered Physical Cost Estimator (FPCE) that predicts doomed batch instances at admission and translates their remaining runtime into a coefficient-bounded range of IT energy (kilowatt-hours), facility energy (kilowatt-hours), and onsite cooling water (liters). The claim is instance-level doomed-workload detection, not hardware-fault prediction: the Alibaba cluster-trace-v2018 records zero machine-status transitions.
+Warehouse-scale computers expend energy and cooling water on batch instances that will fail, but that physical cost remains invisible under reactive monitoring and static PUE/WUE reporting. We present a Fault-triggered Physical Cost Estimator (FPCE) that scores doomed batch instances at admission and translates remaining runtime into a coefficient-bounded range of IT energy (kilowatt-hours), facility energy (kilowatt-hours), and onsite cooling water (liters). The claim is instance-level doomed-workload detection, not hardware-fault prediction: the Alibaba cluster-trace-v2018 records zero machine-status transitions.
 
-A homogeneous 40-machine rack yields 13,088,475 instance events (trainable failure rate 0.1679%; 4,924 costing-eligible failures with measured duration of at least 60 seconds). A frozen time split holds 4,005,360 test instances, of which 204 are costing-eligible. A second rack of the same hardware class is reserved as a replication check, not a distribution-shift test. Power coefficients are a hardware-matched SPECpower envelope (idle 40.1–176 W, peak 241–650 W; n = 19 two-socket systems); PUE (1.15–1.40) and site WUE (0.45–0.48 L/kWh) follow the 2024 LBNL U.S. Data Center Energy Usage Report. Google Cluster Data 2019 was aligned as 67.9 million Borg attempts (18.26% FAIL among FAIL+FINISH). Classifier performance, lead-time distributions, and kilowatt-hour/liter ranges are specified in the methods and left for the corresponding results subsections. No public dataset joins workload failure to measured facility water; physical-cost figures, when reported, will be ranges, not facility measurements.
+On the frozen primary-rack time split (3,974,412 completed test instances; 3,778 failures; positive rate 0.0951%), a histogram gradient-boosted classifier attains PR-AUC 0.802 and ROC-AUC 0.984. At threshold 0.9 — chosen from test precision/recall, not pre-registered — it anticipates 1,210 of 1,276 failures that have a measurable window (median lead 17 s). Costing is restricted to 204 test failures with measured duration of at least 60 s. Letting all 204 run is an **oracle / theoretical ceiling** of 3.39–9.97 IT kWh (1.52–4.79 L). A kill-at-alert policy attributes 3.32–9.78 IT kWh; a reactive retry-or-runtime baseline attributes 3.29–9.68 IT kWh. The incremental model-minus-baseline gap is 0.034–0.097 IT kWh. Killing the 20,523 test false positives would destroy 60–179 IT kWh of useful compute, larger than the 204-row waste pool. No public dataset joins failure to measured facility water; liter figures are coefficient ranges, not meters.
 
 ## 1. Introduction
 
@@ -22,13 +22,14 @@ This work asks a narrower question than “optimize a cooling plant” and a mor
 
 An earlier framing of this problem was infrastructure- and cooling-fault detection. Contact with the Alibaba cluster-trace-v2018 forced a revision. The `machine_meta` table records zero status transitions across 4,034 machines (17,587 rows `USING`, 5 `IMPORT_INSTALLING`). There is no hardware-fault or cooling-fault ground truth in this corpus. A machine-minute prediction target with a 30-minute horizon is also not an anomaly: each machine sees on the order of 550 instance failures over eight days, so about 37% of 30-minute windows are positive and a constant “always fail” classifier matches that precision. The defensible unit is the batch instance. Instance-level `Failed` / `Interrupted` is 0.1679% of completed instances on the primary rack. Killing a doomed instance at admission is an action production schedulers already take. The claim supported by these traces is therefore doomed-workload detection and the physical cost of letting those workloads run. That is the best-supported claim given public data, not a statement of the problem’s ceiling: facility telemetry with maintenance records would legitimately reopen the infrastructure-level question (Section 5.4).
 
-This paper makes three contributions on the evaluation setting, and specifies the remaining experiments in Methods so that later results cannot be mistaken for claims already made.
+This paper makes four contributions.
 
 1. **A leakage-controlled, instance-level prediction table** from Alibaba cluster-trace-v2018, with a frozen time split, a held-out replication rack, an explicit allow/deny feature contract, and a costing-eligibility rule that refuses to invent a duration when `end_time` is missing.
 2. **A cited coefficient registry** in which idle and peak power are a reproducible hardware-matched SPECpower envelope; PUE and site WUE are figure-level citations to a single national report (Shehabi et al., 2024); and water is \(\text{IT kWh} \times \text{WUE}\) with no cooling-share multiplier, because WUE’s denominator is already IT energy (The Green Grid, 2011).
 3. **A cross-provider attempt table** from Google Cluster Data 2019, with the unit of analysis (Borg attempt, not Borg instance lifetime), resource-scale alignment (`plan_cpu_frac`), and evaluation metrics chosen so that a ~109× prevalence gap cannot be mistaken for a successful transfer.
+4. **An end-to-end evaluation** of an admission-time classifier against a reactive baseline, with remaining runtime translated through a 16-corner Fan / PUE / WUE sweep. Oracle ceilings are labeled as such in the same table cell as the number; ranges remain ranges.
 
-The classifier, the Fan et al. (2007) cost translation, and the replay comparison against a reactive baseline are defined in Section 3. Their numerical results occupy Sections 4.4–4.6. Oracle ceilings, where computed, will be labeled as such in the same table cell as the number; ranges will remain ranges.
+The structural hypothesis holds: the classifier produces a positive lead time on a measurable share of windowed test failures, and the translated cost on those events is strictly greater than zero. The operational finding is narrower. Incremental energy versus the reactive baseline on the 204-row costing pool is 0.034–0.097 IT kWh. False-positive kills, if executed, dominate that pool.
 
 ## 2. Related Work
 
@@ -88,7 +89,7 @@ The prediction table contains one row per batch instance.
 
 Alibaba traces are filtered to two homogeneous 40-machine racks, converted to parquet, and resampled to a one-minute host grid. Instance events join planned resources from the parent task, attach the binary label, and compute measured waste windows. A time-based 75/25 split on `start_time` is frozen. SPECpower public results are scraped, normalized per node, and filtered to the 96-thread envelope; a regression test fails if the coefficient file drifts from that parquet. Supercloud GPU power is fit as a form check and is not copied into the CPU envelope.
 
-Google shards are unordered: every file spans the full `collection_id` range, so shard-at-a-time aggregation would split instances. An out-of-core window pairs each terminal with the preceding SCHEDULE and collapses extra terminals that share a schedule. `attempt_index` is the homolog of Alibaba `seq_no`. EVICT and KILL are recorded but excluded from training, so a model trained on Alibaba Failed/Terminated is scored on Google FAIL versus FINISH rather than on preemption. A stratified sample of FAIL+FINISH attempts is retained for the diagnostic in Section 4.3; the full attempt table is the evaluation set for the classifier in Section 4.4.
+Google shards are unordered: every file spans the full `collection_id` range, so shard-at-a-time aggregation would split instances. An out-of-core window pairs each terminal with the preceding SCHEDULE and collapses extra terminals that share a schedule. `attempt_index` is the homolog of Alibaba `seq_no`. EVICT and KILL are recorded but excluded from training, so a model trained on Alibaba Failed/Terminated can be scored on Google FAIL versus FINISH rather than on preemption. A stratified FAIL+FINISH sample is the population for the restricted-feature diagnostic in Section 4.3. The official twelve-feature classifier of Section 3.6 was not scored on Google.
 
 ### 3.5 Leakage control
 
@@ -102,17 +103,15 @@ A machine-readable feature contract lists columns allowed at admission and colum
 
 ### 3.6 Classifier and baselines
 
-A gradient-boosted classifier is used rather than a recurrent model: the label is binary per instance, and inference is required at admission. Features are restricted to the contract in Section 3.5. The model outputs \(P(\text{fail})\). Lead time for a costing-eligible true positive is the interval between `decision_time` and the moment a reactive baseline (retry count, or runtime versus a task-level median) would have acted on the same instance.
+The official model is a `HistGradientBoostingClassifier` (`max_depth=6`, `learning_rate=0.1`, `max_iter=100`, `min_samples_leaf=20`, `random_state=0`, `class_weight="balanced"`, no early stopping). It is fit on all 9,000,205 completed primary-rack training instances. Twelve features are used: `task_type` (ordinal-encoded; unseen test level 2 becomes missing) plus eleven numeric columns — planned CPU/memory fractions, instance count, retry indices, and host-grid CPU, memory, disk, and network utilization at or before `decision_time`. Median imputation is fit on train only. `machine_id`, raw `plan_cpu` / `plan_mem`, `mem_gps`, and `mkpi` are dropped at model time. The label is binary; inference is required at admission, so a recurrent model is not used. Output is \(P(\text{fail})\).
 
-Metrics, reported in the same table as the proposed model:
+**Threshold protocol.** A train-only F1 maximizer lands at 0.352. The operating threshold used for alerts and costing is **0.9**. That cut was read off the **test** precision/recall grid and is not a pre-registered threshold. Ranking metrics (PR-AUC, ROC-AUC) do not use it. Section 4.4 reports 0.5, the train-F1 cut, and 0.9 in the same table.
 
-- Precision, recall, and F1 on completed instances of the primary-rack **time-based** test split.
-- Always-predict-0 and always-predict-1. Always-1 precision at instance level is 0.17%, not 37%.
-- Lead-time distribution on costing-eligible true positives, reported as a distribution, not compressed into a single mean.
-- One replication pass on the domain-52 rack after the primary freeze, reported regardless of outcome, labeled as replication across machines, not as distribution-shift generalization.
-- Cross-provider evaluation on Google attempts using ROC-AUC, PR-AUC, and lift \(=\) PR-AUC / base rate. F1 at threshold 0.5 is confounded by the prevalence gap and is not the headline transfer metric.
+**Reactive baseline.** Fire at the earlier of (i) retry: `seq_no >= 2` at admission, or (ii) runtime: `decision_time` plus the median successful duration of that `task_type`, with medians fit on **train successes only** (global fallback 10 s). A fire at or after `event_end` does not count.
 
-Section 4.3 reports a diagnostic on three overlapping columns only (`plan_cpu_frac`, `plan_mem_frac`, retry index), without a host-grid window. That diagnostic is not the classifier evaluated in Section 4.4.
+**Lead time.** On a test failure, lead time is `event_end − alert_time` only if the alert is strictly before `event_end`. If `event_end <= decision_time` (typical when `end_time=0`), lead time is not measurable.
+
+**Metrics**, in the same table as the proposed model: precision, recall, and F1 on completed primary-rack time-test instances; always-predict-0 and always-predict-1 (always-1 precision equals the 0.0951% test prevalence, not 37%); lead-time distribution, not a single mean. XGBoost variants were trained on the same split and features and are reported as unselected experiments. The official twelve-feature model was not evaluated on the replication rack or on Google; Section 4.3 remains the Google diagnostic.
 
 ### 3.7 Physical cost translation
 
@@ -131,13 +130,15 @@ Every cost output is a **range** across physically consistent corners of \((P_{\
 
 **Populations, kept separate.**
 
-- Primary-rack costing-eligible failures: 4,924 total, of which **204 are in the time-based test split**. The 204 are the headline Alibaba costing sample once true positives are identified on the test set. Costing every one of the 204 without a classifier is an **oracle / theoretical ceiling** and will be labeled as such in the same sentence or table cell.
-- Replication-rack costing-eligible failures: 5,123. Additional costing pool only after the primary evaluation freeze. Combining 204 + 5,123 must be described as two non-identical evaluation stages, not as a single test set of ~5,300 events.
-- Google attempts with measured FAIL duration \(\ge\) 60 s: 1,180,014. Exploratory. Waste windows are wall-clock seconds of a Borg attempt and must be scaled by machine-fraction capacity; Alibaba watt envelopes are not applied to Google durations raw.
+- Primary-rack costing-eligible failures: 4,924 total, of which **204 are in the time-based test split**. The 204 are the headline Alibaba costing sample. Costing every one of the 204 without a classifier is an **oracle / theoretical ceiling** and is labeled as such in the same table cell.
+- Replication-rack costing-eligible failures: 5,123, costed after the primary freeze as an additional pool. Combining 204 + 5,123 is two non-identical stages, not a single test set of ~5,300 events. The official classifier pickle was not scored on this rack (sklearn 1.4.2 bundle; costing does not require the model).
+- Google attempts with measured FAIL duration \(\ge\) 60 s: 1,180,014. Not costed in this MVP. Waste windows would need machine-fraction scaling before any Alibaba watt envelope is applied.
 
-### 3.8 Replay evaluation
+For policy comparison, Fan is re-integrated over \([\texttt{alert_time}, \texttt{event_end})\) so that a later baseline fire attributes a shorter window than an admission-time alert. False positives are **not** added to avoided waste: killing a healthy job destroys useful compute. That collateral is reported separately, using each false positive’s measured duration on the host grid (20,507 of 20,523 have a positive window; median 80 s).
 
-Held-out trace time is replayed in simulated real time. At each instance’s `decision_time` the classifier scores the instance; on costing-eligible true positives the cost range is accumulated against the reactive baseline. A kill-if-\(P(\mathrm{fail}) > \tau\) policy is compared with that baseline on the frozen primary test population. The replay is the experimental accumulator, not a demonstration interface.
+### 3.8 Policy comparison
+
+Frozen test scores and baseline fire times are joined to the 204 costing-eligible rows. Three accumulators are reported across the same 16 coefficient corners: do-nothing (oracle ceiling over all 204), kill at the classifier alert if that alert is before `event_end`, and kill at the reactive fire time if that fire is before `event_end`. Incremental value is model-minus-baseline on those corners. A JSONL time-grid stream exists as telemetry plumbing; the accumulated result is this 204-row policy table, not a one-row smoke replay.
 
 ### 3.9 Coefficient provenance
 
@@ -147,7 +148,7 @@ Supercloud CPU timeseries have no watt column. Node-level files have load averag
 
 ## 4. Results
 
-Sections 4.1–4.3 report corpus statistics, coefficient provenance, and a diagnostic transfer experiment. Sections 4.4–4.6 hold the classifier, physical-cost ranges, and replay comparison. No kilowatt-hour or liter figure is reported in this draft, including no oracle ceiling.
+Sections 4.1–4.3 report corpus statistics, coefficient provenance, and a restricted-feature transfer diagnostic. Sections 4.4–4.6 report the official classifier, the 16-corner cost sweep, and the policy comparison. Every kilowatt-hour and liter figure is a range. Oracle ceilings are labeled in the same table cell.
 
 ### 4.1 Dataset construction and quality
 
@@ -257,75 +258,143 @@ A histogram gradient-boosted classifier trained on Alibaba primary-rack instance
 | Google sample (FAIL+FINISH) | 1,000,111 | 18.28% | 0.5095 | 0.2101 | 1.15 |
 | Google equalized prevalence | 898,158 | 9.001% | 0.5092 | 0.1128 | 1.25 |
 
-ROC-AUC drop Alibaba \(\rightarrow\) Google: **0.101**. After downsampling Google positives to the diagnostic’s 9.001% training rate, ROC-AUC remains 0.509. The collapse is therefore not an artifact of quoting F1 at 0.5. Likely contributing causes, not fully separated here: (a) the ~109× prevalence gap between the Alibaba instance rate (0.17%) and Google FAIL+FINISH (18.26%) — the 200,000-row cap itself oversampled positives relative to the true Alibaba rate; (b) a three-feature subset with no host utilization; (c) `plan_mem_frac` lacking a shared physical divisor. The full model, with host-grid features and without the training cap, is required before a transfer claim is made or withdrawn. What this diagnostic does establish is that comparing raw `plan_cpu`, numeric `machine_id`, or F1 at 0.5 would have measured the wrong thing.
+ROC-AUC drop Alibaba \(\rightarrow\) Google: **0.101**. After downsampling Google positives to the diagnostic’s 9.001% training rate, ROC-AUC remains 0.509. The collapse is therefore not an artifact of quoting F1 at 0.5. Likely contributing causes, not fully separated here: (a) the ~109× prevalence gap between the Alibaba instance rate (0.17%) and Google FAIL+FINISH (18.26%) — the 200,000-row cap itself oversampled positives relative to the true Alibaba rate; (b) a three-feature subset with no host utilization; (c) `plan_mem_frac` lacking a shared physical divisor. The official twelve-feature classifier was not scored on Google; no transfer claim is made. What this diagnostic does establish is that comparing raw `plan_cpu`, numeric `machine_id`, or F1 at 0.5 would have measured the wrong thing.
 
 ### 4.4 Classifier evaluation
 
+Population: completed primary-rack instances with `start_time >= 518{,}355` s (`n = 3{,}974{,}412`; 3,778 failures; positive rate 0.0951%). Ranking metrics do not use a threshold. Operating-point rows at 0.9 use a cut chosen from this same test grid.
+
+**Table 9.** Primary-rack time-test classification. Always-1 precision equals test prevalence. HistGB PR-AUC 0.802 and ROC-AUC 0.984 are shared across HistGB rows.
+
+| Method | Threshold | Precision | Recall | F1 | FP | TP | PR-AUC | ROC-AUC |
+|--------|-----------|----------:|-------:|---:|---:|---:|-------:|--------:|
+| Always-0 | — | 0 | 0 | 0 | 0 | 0 | 0.00095 | 0.500 |
+| Always-1 | — | 0.00095 | 1 | 0.0019 | 3,970,634 | 3,778 | 0.00095 | 0.500 |
+| HistGB | 0.352 (max F1 on **train**) | 0.057 | 0.908 | 0.108 | 56,298 | 3,432 | 0.802 | 0.984 |
+| HistGB | 0.5 | 0.089 | 0.902 | 0.162 | 34,798 | 3,407 | 0.802 | 0.984 |
+| HistGB (operating) | **0.9 (chosen on test)** | 0.141 | 0.889 | 0.243 | 20,523 | 3,360 | 0.802 | 0.984 |
+
+At threshold 0.9 the alert rate is 0.60% (23,883 alerts; FP/TP = 6.11). The reactive baseline is a time-to-fire rule, not a ranking classifier; it is compared on lead time (Table 10) and on cost (Table 11), not in this table. Constant-classifier accuracy is ~99.9% and is not a useful metric. The train-F1 cut is the threshold that does not peek at test labels; it doubles false positives relative to 0.9.
+
+XGBoost was trained on the same twelve features and frozen split and was **not** selected. v1: PR-AUC 0.838, recall 0.886, 13,043 FP (early stopping halted at iteration 0). v2: PR-AUC 0.840, recall 0.899, 32,173 FP. Lead-time medians matched HistGB (17 s). The frozen operational threshold transferred poorly on false positives.
+
+**Table 10.** Lead time on primary-rack **test failures** (`n = 3{,}778`), not on the 204-row costing subset. A failure is anticipated only if the alert is strictly before `event_end`. 2,502 failures have `event_end <= decision_time` and cannot show positive lead.
+
+| Detector | Anticipated / all failures | Anticipated / 1,276 windowed | Median lead (s) | Mean lead (s) | p90 (s) |
+|----------|---------------------------:|-----------------------------:|----------------:|--------------:|--------:|
+| HistGB, threshold 0.9 | 1,210 / 3,778 (32.0%) | 1,210 / 1,276 (94.8%) | 17 | 83 | 378 |
+| Reactive baseline | 807 / 3,778 (21.4%) | 807 / 1,276 (63.2%) | 19 | 119 | 382 |
+
+Of the 1,210 model-anticipated failures, 1,013 have lead \(<\) 1 min; 22 have 1–5 min; 167 have 5–15 min; 8 have \(\ge\) 15 min. On the 794 failures both detectors catch before `event_end`, the median lead-time delta (model − baseline) is **0 s** (mean 3.5 s; both typically fire at admission). The model-only set is 416; the baseline-only set is 13.
+
+The official twelve-feature classifier was not scored on the replication rack or on Google. Section 4.3 remains the Google result.
 
 ### 4.5 Physical cost estimates
 
+Population for Tables 11–12: primary-rack time-test failures with `eligible_for_costing=1` (**n = 204**). Sixteen corners of \((P_{\mathrm{idle}}, P_{\mathrm{peak}}, \text{PUE}, \text{WUE})\) from Table 6. Water = IT kWh \(\times\) WUE; facility energy = IT kWh \(\times\) PUE. Do-nothing costs every one of the 204 without a classifier.
 
-### 4.6 Replay and policy comparison
+**Table 11.** Accumulated physical cost on the 204-row primary-test costing pool. The first row is an **oracle / theoretical ceiling**. Model and baseline rows count only alerts that fire before `event_end` (197 and 203 of 204). Incremental is model-minus-baseline on the same corners.
 
+| Accumulator | n in time | IT kWh | Facility kWh | Water (L) |
+|-------------|----------:|--------|--------------|-----------|
+| Do-nothing (**oracle / theoretical ceiling**) | 204 | 3.39–9.97 | 3.89–13.96 | 1.52–4.79 |
+| HistGB kill-at-alert (t = 0.9, test-chosen) | 197 | 3.32–9.78 | 3.82–13.69 | 1.49–4.69 |
+| Reactive baseline | 203 | 3.29–9.68 | 3.78–13.55 | 1.48–4.65 |
+| Model − baseline (incremental) | — | 0.034–0.097 | 0.039–0.136 | 0.015–0.047 |
+
+The classifier covers fewer costing-eligible rows than the baseline (197 vs 203) but attributes slightly more energy, because Fan is integrated from `alert_time` and admission alerts start earlier than some runtime-threshold fires. The incremental gap is two orders of magnitude smaller than the oracle pool. Midpoints of the oracle range are 6.68 IT kWh and 3.16 L; they are midpoints, not measurements.
+
+**Table 12.** Collateral if the 20,523 test false positives at threshold 0.9 were killed. This energy is useful compute, **not** avoided waste, and is not added to Table 11.
+
+| Estimate | n | Duration | IT kWh | Facility kWh | Water (L) |
+|----------|--:|----------|--------|--------------|-----------|
+| Measured Fan on host grid | 20,523 (20,507 with positive window) | median 80 s; p90 139 s | 60.5–179.1 | 69.5–250.7 | 27.2–86.0 |
+| Napkin (10 s \(\times\) mean CPU 40.72%) | 20,523 | 10 s assumed | 6.95–21.0 | 7.99–29.5 | 3.13–10.1 |
+
+The measured false-positive band (60–179 IT kWh) exceeds the entire 204-row oracle waste pool (3.39–9.97 IT kWh).
+
+**Table 13.** Replication rack, failure domain 52, same eight-day window and hardware class. Population: 5,123 costing-eligible failures. **Oracle / theoretical ceiling only** — the official classifier was not scored (sklearn 1.4.2 pickle). Not merged with the 204-row primary-test pool.
+
+| Accumulator | n | IT kWh | Facility kWh | Water (L) |
+|-------------|--:|--------|--------------|-----------|
+| Do-nothing (**oracle / theoretical ceiling**) | 5,123 | 81.2–244.3 | 93.4–342.1 | 36.5–117.3 |
+
+Google attempt costing was not run.
+
+### 4.6 Policy comparison
+
+Table 11 is the policy result: on the 204-row pool, a kill-if-\(P(\mathrm{fail}) \ge 0.9\) rule and the reactive baseline recover nearly the same energy. The hypothesis in Section 3.1 is supported in its structural form (nonzero lead time on 32% of test failures and 94.8% of windowed failures; nonzero translated cost on costing-eligible true positives). It is not supported as an operational saving over standard reactive practice once false positives are priced. Executing model kills on healthy jobs would discard more IT energy than the doomed-workload pool contains.
+
+Lead-time reports in Section 4.4 cover 3,778 test failures. Costing and policy cover only the 204-row subset. Those populations are not interchangeable.
 
 ## 5. Discussion and Limitations
 
-### 5.1 What the present measurements establish
+### 5.1 What the measurements establish
 
-The instance-level base rate (0.17%) is a genuine class-imbalance problem; beating always-predict-1 is no longer free. The causal chain is physically coherent: a doomed instance burns IT energy that is discarded; that energy converts to water through a metric whose denominator is IT energy; the counterfactual (do not admit, or kill at admission) is a scheduler action. Two of three coefficient families (PUE, WUE) carry figure-level citations to one report. Idle/peak power is a reproducible matched envelope. Google 2019 is aligned at the unit of analysis that does not make the label an accident of first-versus-last terminal.
+The instance-level base rate is a genuine class-imbalance problem; always-1 F1 is 0.0019. Ranking quality on the frozen primary test set is high (PR-AUC 0.802 versus prevalence 0.00095). Most failures with a recorded end after admission are flagged at admission (median lead 17 s), which is why the model and the retry/runtime baseline often fire at the same instant and why the incremental kilowatt-hour gap is 0.034–0.097 IT kWh.
 
-None of that is a measured kilowatt-hour saving, and none of it is a validated water figure. The diagnostic’s Google ROC-AUC of 0.51 is a negative result on a three-feature subset, not a finding that doomed-workload detection cannot transfer. Classifier quality, lead time, and physical-cost ranges remain the quantities that test the hypothesis in Section 3.1.
+The causal chain is physically coherent: a doomed instance burns IT energy that is discarded; that energy converts to water through a metric whose denominator is IT energy; the counterfactual is a scheduler action. Two of three coefficient families (PUE, WUE) carry figure-level citations to one report. Idle/peak power is a reproducible matched envelope.
 
-The supported claim is wasted compute, with water as a downstream consequence of that waste. Infrastructure-fault language would be claiming something `machine_meta` cannot support.
+The operational implication is not “deploy the classifier and harvest the oracle 3.39–9.97 IT kWh.” The oracle assumes perfect detection and no healthy-job kills. The measured policy, at a test-chosen threshold, leaves almost no energy on the table relative to a reactive rule and would destroy 60–179 IT kWh if false positives were actually killed. The estimator’s useful product, on this corpus, is a **range-bounded account of waste on the long-running failure tail**, not a demonstrated net saving.
+
+The supported claim remains wasted compute, with water as a downstream consequence. Infrastructure-fault language would still be claiming something `machine_meta` cannot support.
 
 ### 5.2 Limitations
 
-**Most failed instances have no measured waste window.** Of 21,780 primary-rack failures, 4,924 meet the costing rule. The time-based test split contains 204 of them. Failed rows with `end_time=0` carry a parent-task upper bound, reported separately, never mixed into measured kWh. That is sufficient for an order-of-magnitude range, not for subgroup analysis.
+**Most failed instances have no measured waste window.** Of 21,780 primary-rack failures, 4,924 meet the costing rule. The time-based test split contains 204 of them. Failed rows with `end_time=0` carry a parent-task upper bound, never mixed into measured kWh. Lead time is undefined on 2,502 of 3,778 test failures for the same reason.
 
-**No ground-truth validation is available for water.** Liter figures cannot be checked against a facility meter. Reporting ranges bounded by published coefficients is the mitigation, not a substitute for a pilot.
+**The operating threshold was chosen on the test set.** Precision, recall, F1, alert counts, and the 197/204 policy coverage at 0.9 are therefore optimistic relative to a pre-registered cut. PR-AUC, ROC-AUC, and the train-F1 operating point (0.352) do not share that defect. A later study should freeze the threshold on training or inner validation before touching test.
 
-**Idle and peak power remain a published envelope, not a facility measurement.** The matched SPEC range (40.1–176 W idle, 241–650 W peak, n = 19) is the dominant source of width in every forthcoming kWh/liter figure. Supercloud does not close this gap: its CPU timeseries has no watt column.
+**Median measurable lead is 17 seconds.** One-minute host resolution and a kill-at-admission policy leave little wall-clock for a human operator. The energy that can be saved is the long tail (167 events at 5–15 min among 1,210 anticipated failures).
 
-**Generalization under distribution shift is not established.** The held-out rack is a replication check (same window, same hardware, near-identical marginals). The Google diagnostic shows ROC-AUC 0.51 on a restricted feature set; the cause is only partly diagnosed (prevalence, missing host features, incomparable memory fractions). The full classifier is required before this is treated as a result about shift.
+**False-positive collateral dominates the waste pool.** At the operating point, FP/TP is 6.11. Measured Fan on those healthy windows is 60–179 IT kWh versus 3.39–9.97 IT kWh of doomed-workload waste.
 
-**PUE and WUE are national averages, except where operator ESG points are used as a labeled scale.** A number from a named hyperscaler’s sustainability report is not interchangeable with LBNL’s U.S. average. Table 7 keeps them separate.
+**No ground-truth validation is available for water.** Liter figures cannot be checked against a facility meter.
 
-**This methodology does not validate results against Frontier or any specific facility.** It validates an approach on public data.
+**Idle and peak power remain a published envelope, not a facility measurement.** The matched SPEC range (40.1–176 W idle, 241–650 W peak, n = 19) is the dominant source of width in every kWh/liter figure. Supercloud does not close this gap.
 
-**Classifier metrics and physical-cost ranges are not yet in this draft.** Filling those cells with the Section 4.3 diagnostic, or with an unlabeled oracle over all 204 test failures, would confuse a ceiling with a deliverable.
+**Generalization under distribution shift is not established.** The held-out rack is a replication check; only an oracle costing was run there. The Google diagnostic still shows ROC-AUC 0.51 on three features; the official twelve-feature model was not transferred.
+
+**PUE and WUE are national averages**, except where operator ESG points are a labeled scale (Table 7).
+
+**This methodology does not validate results against Frontier or any specific facility.**
 
 ### 5.3 Impact
 
-The physical cost of a doomed workload is, under current monitoring practice, invisible at the moment of admission. A range-bounded estimator would give operators — and potentially external auditors — an order-of-magnitude estimate of energy and onsite water attached to failures they already log, without requiring full cooling-plant instrumentation. That is relevant to disclosure requirements around AI and cloud water and carbon reporting: a tool built on telemetry already collected lowers the barrier for operators who lack dedicated sustainability instrumentation.
+The physical cost of a doomed workload is invisible at admission under current monitoring. The completed estimator attaches a coefficient-bounded range to failures that operators already log, without cooling-plant instrumentation. On this public rack, that range for eight days of the long-running failure tail is 3.39–9.97 IT kWh (**oracle / theoretical ceiling**) and 3.32–9.78 IT kWh under the classifier. The incremental advantage over a reactive rule is 0.034–0.097 IT kWh. The honest industrial reading is that **visibility is demonstrated; net saving over reactive practice is not.**
 
-What the present evidence does *not* buy: a guaranteed percentage saving; a replacement for Modelica-grade cooling optimization; a hardware-fault early-warning system; or an ESG disclosure that could be filed without a facility-specific coefficient campaign. Those distinctions matter for an industrial reader. Overstating them fails the claim more badly than leaving the cost tables blank until they are computed.
+What the evidence does *not* buy: a guaranteed percentage saving; a replacement for Modelica-grade cooling optimization; a hardware-fault early-warning system; an automatic kill policy that is energy-positive after false positives; or an ESG disclosure that could be filed without a facility-specific coefficient campaign.
 
-A useful split for any non-technical summary of this work is **demonstrated** (instance-level tables, freeze, cited envelopes, Google attempt alignment, diagnostic AUC 0.51 labeled as such) versus **requires a facility pilot to confirm** (any operational kWh/liter saving, any site WUE, any hardware-fault claim). Projections must not read as demonstrated results.
+**Demonstrated:** instance-level tables and freeze; cited envelopes; Google attempt alignment; primary-test ranking metrics; lead-time distributions; 16-corner ranges on 204 events, with oracle labeled; false-positive collateral ranges. **Requires a facility pilot to confirm:** any operational kWh/liter saving, any site WUE, any hardware-fault claim, any transfer of the official classifier off this rack.
 
 ### 5.4 Future work
 
-**Remaining experiments on this corpus.** Classifier evaluation on the frozen primary test set; one replication pass; Fan integral and 16-corner sweep on costing-eligible true positives; replay accumulation versus the reactive baseline, including a kill-if-\(P(\mathrm{fail}) > \tau\) policy. Scoring the Alibaba-trained full model on Google attempts uses ROC-AUC, PR-AUC, and lift. Supercloud remains a form check, not a CPU-coefficient source.
+**On this corpus.** Score the official twelve-feature model on the replication rack (requires a reloadable pickle) and on Google attempts (ROC-AUC / PR-AUC / lift, not F1 at 0.5). Cost Google only after machine-fraction scaling. Freeze a threshold on train or inner validation and re-report Table 9 operating points. A precision-oriented cut (Table grid point at recall \(\ge\) 0.80 gives precision 0.37 and 5,128 FP) would change the collateral arithmetic and should be pre-registered, not read off test.
 
-**Operator-published facility WUE.** Substituting a site WUE for the U.S. national average reframes the output; it does not provide validation ground truth.
+**Operator-published facility WUE.** Substituting a site WUE reframes the output; it does not validate it.
 
-**Facility-grade validation.** Given access to a real facility, swept coefficient ranges could be replaced with measured idle/peak power and actual WUE, allowing direct comparison between the estimator and meters. That is the only means of establishing whether the coefficient-based approach is accurate enough for operational use. A pilot would need admission-time job/instance records with outcomes; host utilization at one-minute or better; measured IT power or a calibrated per-class power model; site WUE and PUE for the same period; and a freeze rule analogous to Section 3.1 so that costing is not tuned on the facility set used to claim savings.
+**Facility-grade validation.** Replace swept envelopes with measured idle/peak power and actual WUE; compare the estimator to meters. A pilot needs admission-time outcomes, host utilization at one-minute or better, measured IT power or a calibrated per-class model, site WUE and PUE for the same period, and a freeze rule analogous to Section 3.1.
 
-**Genuine hardware-fault prediction.** The present work predicts doomed workloads because the Alibaba trace contains no hardware-fault labels. A trace that records machine state transitions, or facility telemetry with maintenance records, would permit the infrastructure-level framing originally considered and since withdrawn.
+**Genuine hardware-fault prediction.** The present work predicts doomed workloads because the Alibaba trace contains no hardware-fault labels.
 
-**Governance and monitoring extension.** The telemetry-classification approach used here is structurally related to work on detecting AI training runs from power and network-bandwidth signals, including a classifier reported at approximately 95% accuracy distinguishing AI training from other workloads on MIT Supercloud (Hardware-Level Governance of AI Compute, 2026). That paper uses power **and** network; the Supercloud artifact used here is GPU power only. This is a plausible extension given architectural similarity between fault classification and workload-type classification. It is not a current capability.
+**Governance and monitoring extension.** Detecting AI training runs from power and network signals (Hardware-Level Governance of AI Compute, 2026) is structurally related and is not a current capability. That paper uses power and network; the Supercloud artifact used here is GPU power only.
 
-**What no dataset can fix.** No public dataset joins fault events to measured facility water consumption. That is a property of the problem. It is why results are reported as coefficient-bounded ranges, and it remains true after any of the crossings above.
+**What no dataset can fix.** No public dataset joins fault events to measured facility water. Results remain coefficient-bounded ranges.
 
-Hardware-failure corpora such as Backblaze drive statistics or the Computer Failure Data Repository were considered and rejected: they describe different failure modes with no join key to the Alibaba workload. Combining them would recreate the framing error that revision 11 in Appendix A corrected.
+Hardware-failure corpora such as Backblaze drive statistics were considered and rejected: they have no join key to the Alibaba workload.
 
 ## 6. Conclusion
+
+A doomed batch instance burns energy that is discarded. On a frozen 40-machine Alibaba rack, that waste is detectable at admission with high ranking quality (PR-AUC 0.802) and, for failures with a recorded end, a median 17 s lead. Translating the 204 test failures that have a measurable window of at least 60 s through a published SPEC \(\times\) LBNL envelope yields an **oracle / theoretical ceiling** of 3.39–9.97 IT kWh and 1.52–4.79 L of onsite water. A histogram gradient-boosted policy at a test-chosen threshold of 0.9 recovers 3.32–9.78 IT kWh; a reactive retry-or-runtime rule recovers 3.29–9.68 IT kWh. The incremental gap is 0.034–0.097 IT kWh. Killing the model’s 20,523 false positives would discard 60–179 IT kWh of useful work.
+
+FPCE therefore makes the physical cost of inaction visible as a range. It does not, on this corpus, outperform ordinary reactive practice by an amount that survives contact with false positives, and it does not measure facility water. Those are the results the data support.
 
 
 ## Code and Data
 
-- **Code:** accompanying `fpce` repository (ingestion, feature contract, coefficient loader, Google alignment, SPEC/Supercloud provenance).
-- **Reproduction:** `pip install -e ".[dev]"` then `bash scripts/run_ingest.sh`. Checks: `python scripts/validate_config.py && pytest`.
-- **Pinned artifacts:** `params/physical_cost.toml`, `params/feature_contract.json`, frozen split JSON, SPEC envelope parquet, quality reports.
+- **Code:** accompanying `fpce` repository (ingestion, feature contract, classifier, Fan translation, policy accumulation, SPEC/Supercloud provenance).
+- **Reproduction:** `pip install -e ".[dev]"` then `bash scripts/run_ingest.sh`. Checks: `python scripts/validate_config.py && pytest`. Frozen HistGB bundle and handoff table: `fpce-role-b-freeze`. Costing: `fpce-role-c-cost`. Policy table: `fpce-policy-sim`.
+- **Pinned artifacts:** `params/physical_cost.toml`, `params/feature_contract.json`, frozen split JSON, SPEC envelope parquet, `reports/primary_hgb_*.json`, `reports/policy_simulation.json`, `reports/replication_eval.json`.
 - **Traces:** Alibaba Cluster Trace Program v2018 (OSS mirror). Google ClusterData2019 (one cell, one week). MIT Supercloud HPCA’22 GPU power (AWS Registry of Open Data).
 
 ## Author Contributions
@@ -407,10 +476,15 @@ This appendix documents how the present draft differs from the original proposal
 |------------|--------|-----------|
 | Power coefficients unreproducible / too generic | Closed | Matched SPEC envelope, provenance test |
 | Linear form untested on measured power | Closed as a form check | Supercloud GPU \(R^2 = 0.79\); coefficients do not transfer |
-| No distribution-shift test | Corpus aligned; full classifier pending | Diagnostic ROC-AUC 0.51 on Google sample |
+| Classifier and cost on primary test | Closed | Tables 9–12; threshold 0.9 chosen on test |
+| Incremental cost vs reactive baseline | Closed (tiny) | 0.034–0.097 IT kWh on 204 rows |
+| False-positive collateral | Closed as a measurement | 60–179 IT kWh if 20,523 FPs killed |
+| Replication classifier | Open | Oracle costing only (5,123 rows; 81–244 IT kWh) |
+| Official model on Google | Open | Diagnostic ROC-AUC 0.51 on three features |
 | Prevalence not comparable (~109\(\times\)) | Open (metric choice) | ROC-AUC / PR-AUC / lift; do not cite F1 at 0.5 as shift |
 | Feature scales incompatible | Closed for CPU | Google `plan_cpu_frac` p50 0.01041 vs Alibaba `plan_cpu/100/96` = 0.0104. Memory open. |
-| Small costing sample (204 test events) | Partially closed | Task-level upper bound + deferred replication-rack pool (5,123) + Google 1.18 M costable attempts |
+| Small costing sample (204 test events) | Partially closed | Replication oracle pool 5,123; Google costing not run |
+| Operating threshold selected on test | Open | Freeze on train / inner val and re-report |
 | Water coefficient is a national average | Open | Operator ESG scale table exists; not validation |
 | No joint fault-and-water ground truth | None available | Remains a stated limitation |
 
@@ -418,6 +492,6 @@ This appendix documents how the present draft differs from the original proposal
 
 Claude Opus 5.0 and Cursor Grok 4.6 were used in this project for pipeline implementation and debugging, and for drafting this technical record from repository artifacts (quality reports, coefficient files, proposal text, and source comments).
 
-Every quantitative claim in Sections 4.1–4.3 was checked against the pinned quality reports, the coefficient file, and the frozen split. Coefficient citations were checked against the registry references. No kilowatt-hour or liter estimate was generated by a language model. Table 8 is labeled as a restricted-feature diagnostic and was not rewritten as the official classifier result.
+Every quantitative claim in Sections 4.1–4.6 was checked against the pinned reports: `data_quality.json`, `google_quality.json`, `cross_provider.json`, `supercloud_fan_fit.json`, `operator_coefficient_scale.json`, `primary_hgb_baseline.json`, `primary_hgb_thresholds.json`, `primary_hgb_lead_time.json`, `policy_simulation.json`, `replication_eval.json`, `params/physical_cost.toml`, and the frozen split. Oracle ceilings in Tables 11 and 13 are labeled in the table cell. Table 8 remains a restricted-feature diagnostic and was not rewritten as the official classifier. No language model invented a kilowatt-hour or liter figure.
 
-Language-model assistance does not substitute for independent verification. A reader who distrusts AI-generated research should re-run the quality reports and tests against the pinned parquets rather than take this prose as primary evidence.
+Language-model assistance does not substitute for independent verification. A reader who distrusts AI-generated research should re-run the quality reports, `fpce-policy-sim`, and tests against the pinned parquets rather than take this prose as primary evidence.

@@ -8,7 +8,7 @@ This document is the source of truth for Role B (data scientist). A new agent sh
 **Official threshold:** `0.9`  
 **XGBoost:** documented experiments only; **not** the official Role B model.
 
-Physical kWh / water liters are **out of scope**. Role C has not started.
+Physical kWh / water liters are **out of scope for Role B**. Role C later costed the 204-row primary-test pool; the accumulated policy result is `reports/policy_simulation.json`.
 
 ---
 
@@ -209,9 +209,9 @@ v2 showed that boosting can use many trees; the frozen operational threshold tra
 
 ## What Role C should consume
 
-**Do not compute kWh or liters until Role C starts.**
+Role C costing on this freeze is `reports/role_c_costing.parquet`. Policy accumulation: `fpce-policy-sim`.
 
-When Role C starts:
+When consuming this freeze for costing:
 
 1. Read `reports/role_b_handoff.parquet` (or regenerate with `fpce-role-b-freeze --skip-model`).
 2. Filter `failed=1` and `eligible_for_costing=1`. Optionally require `model_alert=1` for model-attributed waste vs baseline fire times.
@@ -228,8 +228,8 @@ Map rows back to `instance_events.parquet` with `instance_name`, `machine_id`, `
 1. Frozen classifier: `models/primary_hgb_frozen.joblib` (`model`, `imputer`, `task_type_encoder`, `feature_order`, `threshold=0.9`). Helpers: `fpce.model.freeze.predict_proba_with_bundle`.
 2. Reactive baseline: `fpce.model.baseline.reactive_fire_time` with train medians from `reports/primary_hgb_lead_time.json` (`reactive_runtime_medians_seconds`) or recompute on train only.
 3. Per-event scores and alerts: `reports/role_b_handoff.parquet` (no need to rescore the frozen test).
-4. Replay source: `data/processed/primary/instance_events.parquet` + `time_grid.parquet`. Stub: `fpce-replay`. Contract: `src/fpce/replay/README.md`.
-5. Role C translation API when it exists — not before.
+4. Replay source: `data/processed/primary/instance_events.parquet` + `time_grid.parquet`. Accumulated result: `fpce-policy-sim`. JSONL stub: `fpce-replay`. Contract: `src/fpce/replay/README.md`.
+5. Role C translation: `fpce.costing.translate.translate()` and `reports/role_c_costing.parquet`.
 
 Do **not** load XGBoost pickles as the production scorer.
 
@@ -261,4 +261,4 @@ Assemble matrices without fitting: `python -m fpce.features.assemble`.
 
 ## Role B completeness
 
-Role B **is complete** for the primary-rack official classifier, threshold, lead-time vs reactive baseline, freeze artifacts, and handoff table. Not in this freeze: Role C costing, Role D full replay, replication-rack evaluation, scheduler policy simulation.
+Role B **is complete** for the primary-rack official classifier, threshold, lead-time vs reactive baseline, freeze artifacts, and handoff table. Later roles: C costed the 204-row test pool; `fpce-policy-sim` accumulates kill-vs-baseline ranges. Still open: replication-rack evaluation and Google costing.

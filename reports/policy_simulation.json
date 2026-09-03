@@ -1,0 +1,154 @@
+{
+  "role": "D",
+  "status": "policy_simulation",
+  "official_model": "HistGradientBoostingClassifier",
+  "official_threshold": 0.9,
+  "threshold_note": "Official operating threshold 0.9 was chosen from test PR/FP behaviour (reports/primary_hgb_thresholds.json). Ranking metrics (PR-AUC / ROC-AUC) do not use this threshold. Do not treat 0.9 as a pre-registered cut.",
+  "n_costing_eligible_failures": 204,
+  "n_rows": 204,
+  "n_missing_role_c": 0,
+  "n_model_alerts_in_time": 197,
+  "n_baseline_alerts_in_time": 203,
+  "n_parameter_corners": 16,
+  "false_positives_excluded": {
+    "n_test_fp_at_0.9": 20523,
+    "note": "Destroyed useful work if model-alerted successes are killed at admission. Not added to the 204-row avoided total.",
+    "napkin": {
+      "n_fp": 20523,
+      "dt_seconds": 10.0,
+      "u_mean": 0.4072,
+      "cost": {
+        "it_kwh_min": 6.949685247333334,
+        "it_kwh_max": 21.036804706666665,
+        "facility_kwh_min": 7.992138034433334,
+        "facility_kwh_max": 29.45152658933333,
+        "water_liters_min": 3.1273583613000007,
+        "water_liters_max": 10.097666259199999
+      }
+    },
+    "measured": {
+      "cost": {
+        "it_kwh_min": 60.45847491955092,
+        "it_kwh_max": 179.08758275361112,
+        "facility_kwh_min": 69.52724615748356,
+        "facility_kwh_max": 250.72261585505555,
+        "water_liters_min": 27.20631371379792,
+        "water_liters_max": 85.96203972173332
+      },
+      "n_with_positive_window": 34735,
+      "n_zero_or_missing_window": 63,
+      "duration_seconds_median": 84.0,
+      "duration_seconds_p90": 245.0,
+      "n_false_positives": 20523,
+      "n_sampled": 34798,
+      "scale_factor": 1.0,
+      "alert_col": "model_alert",
+      "start_col": "decision_time",
+      "n_destroyed_windows_at_0.9": 20507
+    }
+  },
+  "do_nothing": {
+    "it_kwh_min": 3.385132878287037,
+    "it_kwh_max": 9.974337502777779,
+    "facility_kwh_min": 3.892902810030093,
+    "facility_kwh_max": 13.964072503888888,
+    "water_liters_min": 1.5233097952291668,
+    "water_liters_max": 4.787682001333333
+  },
+  "model_policy": {
+    "n_alerts_in_time": 197,
+    "avoided": {
+      "it_kwh_min": 3.319475071398148,
+      "it_kwh_max": 9.778211245000001,
+      "facility_kwh_min": 3.8173963321078705,
+      "facility_kwh_max": 13.689495742999998,
+      "water_liters_min": 1.4937637821291667,
+      "water_liters_max": 4.6935413976
+    },
+    "n_test_alerts": 23883,
+    "n_test_fp": 20523,
+    "destroyed": {
+      "it_kwh_min": 60.45847491955092,
+      "it_kwh_max": 179.08758275361112,
+      "facility_kwh_min": 69.52724615748356,
+      "facility_kwh_max": 250.72261585505555,
+      "water_liters_min": 27.20631371379792,
+      "water_liters_max": 85.96203972173332
+    },
+    "net": {
+      "it_kwh_min": -175.76810768221296,
+      "it_kwh_max": -50.68026367455092,
+      "facility_kwh_min": -246.90521952294768,
+      "facility_kwh_max": -55.837750414483565,
+      "water_liters_min": -84.46827593960415,
+      "water_liters_max": -22.512772316197918
+    },
+    "n_false_positives": 20523,
+    "destroyed_sample": {
+      "n_sampled": 34798,
+      "scale_factor": 1.0,
+      "n_with_positive_window": 34735,
+      "duration_seconds_median": 84.0,
+      "duration_seconds_p90": 245.0,
+      "alert_col": "model_alert",
+      "start_col": "decision_time"
+    }
+  },
+  "baseline_policy": {
+    "n_alerts_in_time": 203,
+    "avoided": {
+      "it_kwh_min": 3.285466652138889,
+      "it_kwh_max": 9.681084200555555,
+      "facility_kwh_min": 3.778286649959722,
+      "facility_kwh_max": 13.553517880777775,
+      "water_liters_min": 1.4784599934625002,
+      "water_liters_max": 4.646920416266667
+    },
+    "n_test_alerts": 1849651,
+    "n_test_fp": 1848844,
+    "destroyed": {
+      "it_kwh_min": 5961.6420274623915,
+      "it_kwh_max": 17533.149858950033,
+      "facility_kwh_min": 6855.888331581749,
+      "facility_kwh_max": 24546.409802530045,
+      "water_liters_min": 2682.738912358076,
+      "water_liters_max": 8415.911932296014
+    },
+    "net": {
+      "it_kwh_min": -17529.864392297895,
+      "it_kwh_max": -5951.960943261836,
+      "facility_kwh_min": -24542.631515880086,
+      "facility_kwh_max": -6842.334813700972,
+      "water_liters_min": -8414.433472302551,
+      "water_liters_max": -2678.0919919418093
+    },
+    "n_false_positives": 1848844,
+    "destroyed_sample": {
+      "n_sampled": 50000,
+      "scale_factor": 36.97688,
+      "n_with_positive_window": 50000,
+      "duration_seconds_median": 24.0,
+      "duration_seconds_p90": 191.0,
+      "alert_col": "baseline_alert",
+      "start_col": "baseline_alert_time"
+    }
+  },
+  "model_minus_baseline": {
+    "it_kwh_min": 0.0340084192592593,
+    "it_kwh_max": 0.0971270444444444,
+    "facility_kwh_min": 0.03910968214814819,
+    "facility_kwh_max": 0.13597786222222202,
+    "water_liters_min": 0.015303788666666686,
+    "water_liters_max": 0.04662098133333331
+  },
+  "pool_note": "Lead-time reports in Role B cover 3,778 test failures. This simulation is the 204-row eligible_for_costing=1 subset only.",
+  "n_test_rows": 3974412,
+  "headline": "Both admission-kill policies are net-negative on the 204-row costing pool. The model is ~100\u00d7 less bad than the reactive baseline because it fires on 0.6% of test rows instead of 46.5%.",
+  "pool_artifact_note": "The costing pool is failed jobs with a measured waste window >= 60 s. The reactive baseline fires at decision_time + train-success median (global 10 s, or by task_type). On that pool it almost always arrives in time (203/204). That is a selection artifact, not evidence that the baseline is a strong detector.",
+  "runner_bug_note": "src/fpce/replay/runner.py indent: utilization / cpu_util_percent conversion sits outside the per-row loop, so only the last eligible row is costed. reports/replay_summary.json n_costed_rows=1 is that bug, not a completed experiment. Use fpce-policy-sim + fpce-policy-report.",
+  "model_less_bad_than_baseline": {
+    "it_kwh_ratio_at_pessimistic_net": 99.73290731440154,
+    "it_kwh_ratio_at_optimistic_net": 117.44139654606043,
+    "note": "Ratio of |baseline net| / |model net|. Pessimistic uses the wide end of each range (17529.9 vs model); both policies remain negative."
+  }
+}
